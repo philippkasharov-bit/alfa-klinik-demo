@@ -1,0 +1,14 @@
+---
+interface Props {
+  variant?: 'ruled' | 'outline' | 'tinted' | 'accent';
+  href?: string;          // makes the whole card clickable via the title link
+  as?: 'article' | 'div' | 'li';
+  class?: string;
+}
+const { variant = 'ruled', href, as: Tag = 'article', class: cls } = Astro.props;
+---
+<Tag class:list={['card', `card--${variant}`, href && 'card--interactive', cls]}>
+  <slot name="meta" />
+  <slot />
+  {Astro.slots.has('footer') && <div class="card__footer"><slot name="footer" /></div>}
+</Tag>

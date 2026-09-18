@@ -1,0 +1,23 @@
+---
+interface Props {
+  size?: 'sm' | 'md' | 'lg';
+  tone?: 'default' | 'subtle' | 'accent' | 'inverse';
+  width?: 'default' | 'text' | 'narrow' | 'wide' | 'bleed';
+  ruled?: boolean;
+  /** Continues the previous section's chapter: tight top interval instead of a full section gap */
+  join?: boolean;
+  id?: string;
+  labelledby?: string;
+  class?: string;
+}
+const { size = 'md', tone = 'default', width = 'default', ruled, join, id, labelledby, class: cls } = Astro.props;
+---
+<section
+  id={id}
+  aria-labelledby={labelledby}
+  class:list={['section', size !== 'md' && `section--${size}`, tone !== 'default' && `section--${tone}`, ruled && 'section--ruled', join && 'section--join', cls]}
+>
+  <div class:list={['container', width !== 'default' && `container--${width}`]}>
+    <slot />
+  </div>
+</section>

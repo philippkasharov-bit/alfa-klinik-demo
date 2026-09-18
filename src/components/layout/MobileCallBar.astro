@@ -1,0 +1,125 @@
+---
+// Sticky appointment bar — phones/tablets only (< 64rem).
+// Non-intrusive rules:
+//   - appears only after the first screen has been scrolled past
+//   - hides whenever another call-to-action is already visible
+//     (contact section, final CTA, pricing CTA, footer)
+//   - hides while the mobile menu is open or a form field has focus (keyboard up)
+import { clinic } from '../../data/clinic';
+---
+<div class="callbar" data-callbar aria-hidden="true">
+  <div class="callbar__inner">
+    <p class="callbar__info">
+      <span class="callbar__phone t-num">{clinic.phone.display}</span>
+      <span class="callbar__hours t-num">{clinic.hours[0].time}, вс — выходной</span>
+    </p>
+    <a class="btn btn--primary btn--sm callbar__btn" href={clinic.phone.href} tabindex="-1" data-callbar-link>
+      <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
+        <path d="M6.6 2.5H4.1c-.9 0-1.6.8-1.5 1.7.8 7 6.7 12.9 13.7 13.7.9.1 1.7-.6 1.7-1.5v-2.5l-3.4-1.4-1.8 1.8a10.6 10.6 0 0 1-4.9-4.9l1.8-1.8L6.6 2.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+      </svg>
+      Записаться
+    </a>
+  </div>
+</div>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-callbar]');
+  const link = bar?.querySelector<HTMLAnchorElement>('[data-callbar-link]');
+  const MOBILE = window.matchMedia('(max-width: 63.99rem)');
+  const HIDE_NEAR = '.contact, .final, .footer, .pricing__cta, .offer__actions, .hero__actions';
+
+  if (bar && link) {
+    let ticking = false;
+    let shown = false;
+
+    const setShown = (v: boolean) => {
+      if (v === shown) return;
+      shown = v;
+      bar.classList.toggle('is-visible', v);
+      bar.setAttribute('aria-hidden', String(!v));
+      link.tabIndex = v ? 0 : -1;
+    };
+
+    const inView = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return r.top < window.innerHeight && r.bottom > 0;
+    };
+
+    const update = () => {
+      ticking = false;
+      if (!MOBILE.matches) return setShown(false);
+      const pastIntro = window.scrollY > window.innerHeight * 0.8;
+      const menuOpen = document.documentElement.classList.contains('menu-open');
+      const typing = document.activeElement?.matches('input, textarea, select') ?? false;
+      const otherCta = [...document.querySelectorAll(HIDE_NEAR)].some(inView);
+      setShown(pastIntro && !menuOpen && !typing && !otherCta);
+    };
+    const request = () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    };
+
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', request, { passive: true });
+    document.addEventListener('focusin', request);
+    document.addEventListener('focusout', () => setTimeout(request, 50));
+    new MutationObserver(request).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    MOBILE.addEventListener('change', request);
+    update();
+  }
+</script>
+
+<style>
+  .callbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: calc(var(--z-header) - 1);
+    padding: var(--space-2) var(--space-3) max(var(--space-2), env(safe-area-inset-bottom));
+    pointer-events: none;
+    transform: translateY(110%);
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+  .callbar.is-visible { transform: none; pointer-events: auto; }
+
+  .callbar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    max-width: 40rem;
+    margin-inline: auto;
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+    background: var(--color-bg-inverse);
+    color: var(--color-text-inverse);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .callbar__info { display: grid; min-width: 0; line-height: 1.2; }
+  .callbar__phone { font-size: var(--size-small); font-weight: var(--weight-semibold); white-space: nowrap; }
+  .callbar__hours {
+    font-size: var(--size-label);
+    color: color-mix(in srgb, var(--color-text-inverse) 65%, transparent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .callbar__btn {
+    flex: none;
+    gap: var(--space-2);
+    font-size: var(--size-small);
+    font-weight: var(--weight-semibold);
+  }
+  .callbar__btn:focus-visible { outline: 2px solid var(--color-text-inverse); outline-offset: 2px; border-radius: var(--radius-pill); }
+
+  @media (max-width: 22.49rem) {
+    .callbar__hours { display: none; }
+    .callbar__btn { padding: 0 var(--space-4); }
+  }
+
+  @media (min-width: 64rem) {
+    .callbar { display: none; }
+  }
+</style>

@@ -1,0 +1,118 @@
+/* Containers, sections, grid, responsive helpers. Mobile-first. */
+
+.container {
+  width: 100%;
+  max-width: calc(var(--container) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.container--narrow { max-width: calc(var(--container-narrow) + 2 * var(--gutter)); }
+.container--wide   { max-width: calc(var(--container-wide)   + 2 * var(--gutter)); }
+.container--bleed  { max-width: none; padding-inline: 0; }
+
+/* Sections */
+.section            { padding-block: var(--section-md); }
+.section--sm        { padding-block: var(--section-sm); }
+.section--lg        { padding-block: var(--section-lg); }
+.section--flush-top { padding-top: 0; }
+/* Page rhythm has three intervals, not one:
+     join     — a section that continues the previous chapter      (md + space-6 ≈ 150px)
+     standard — an ordinary boundary between chapters               (md + md     ≈ 245px)
+     break    — into / out of the two dark moments (offer, close)   (md + lg     ≈ 290px)
+   section--lg is reserved for the dark bands; everything else is md. */
+.section--join      { padding-top: var(--space-6); }
+/* Large flat fields get a ~3-4% top-to-bottom shift of their own token:
+   enough to imply a light source, not enough to read as a gradient. */
+.section--subtle {
+  background: linear-gradient(180deg,
+    var(--color-bg-subtle) 0%,
+    color-mix(in srgb, var(--color-bg-subtle) 96%, var(--color-text)) 100%);
+}
+.section--accent {
+  background: linear-gradient(180deg,
+    var(--color-bg-accent) 0%,
+    color-mix(in srgb, var(--color-bg-accent) 96%, var(--color-text)) 100%);
+}
+.section--inverse {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--color-bg-inverse) 96%, var(--color-text-inverse)) 0%,
+    var(--color-bg-inverse) 100%);
+  color: var(--color-text-inverse);
+}
+.section--inverse .t-muted,
+.section--inverse .t-label { color: color-mix(in srgb, var(--color-text-inverse) 68%, transparent); }
+.section--inverse :focus-visible { outline-color: var(--color-text-inverse); }
+/* Hairline between two sections on the same background */
+.section--ruled { border-top: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent); }
+
+/* Section header: label + heading + intro, left-aligned editorial */
+.section-head {
+  display: grid;
+  gap: var(--space-5);
+  margin-bottom: var(--space-8);
+}
+@media (min-width: 64rem) {
+  .section-head--split {
+    grid-template-columns: 5fr 7fr;
+    align-items: end;
+    column-gap: var(--grid-gap);
+  }
+}
+
+/* Vertical rhythm */
+.stack > * + * { margin-top: var(--stack-space, var(--space-5)); }
+.stack--sm { --stack-space: var(--space-3); }
+.stack--lg { --stack-space: var(--space-7); }
+
+/* 12-col grid — collapses to 1 col below md */
+.grid {
+  display: grid;
+  gap: var(--grid-gap);
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 48rem) {
+  .grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid--12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+}
+@media (min-width: 64rem) {
+  .grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+/* asymmetric editorial split (5 / 7) */
+@media (min-width: 64rem) {
+  .grid--editorial { grid-template-columns: 5fr 7fr; }
+  .grid--editorial-rev { grid-template-columns: 7fr 5fr; }
+}
+
+.rule { border: 0; border-top: 1px solid var(--color-border); }
+
+/* Responsive visibility */
+@media (max-width: 63.99rem) { .hide-mobile  { display: none !important; } }
+@media (min-width: 64rem)    { .hide-desktop { display: none !important; } }
+
+/* Media frames with fixed ratios + placeholder state */
+.media {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  aspect-ratio: var(--ratio, 4 / 5);
+}
+.media > img { width: 100%; height: 100%; object-fit: cover; }
+.media--placeholder {
+  display: grid;
+  place-items: center;
+  background: var(--color-placeholder-bg);
+  border: 1px dashed var(--color-border-strong);
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--space-5);
+}
+
+/* Rendering: long homepage sections well below the fold (no sticky children) are skipped
+   by the browser until they approach the viewport. `auto` remembers the real size once
+   rendered, so scrollbar and anchor positions stay stable. */
+.journey, .doctors, .faq, .footer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}

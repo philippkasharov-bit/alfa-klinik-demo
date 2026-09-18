@@ -1,0 +1,247 @@
+---
+// Homepage hero. Copy is paraphrased strictly from the clinic's own stated
+// benefits on alfaklinik.ru/skidki.htm — no invented claims or numbers.
+import Button from '../ui/Button.astro';
+import { clinic } from '../../data/clinic';
+import { appointmentCta } from '../../data/navigation';
+
+interface Props {
+  /** Supply once real photography exists. Without it a marked placeholder renders. */
+  image?: { src: string; alt: string; width: number; height: number };
+}
+const { image } = Astro.props;
+---
+<section class="hero" aria-labelledby="hero-title">
+  <div class="container container--wide hero__grid">
+    <div class="hero__content">
+      <div class="hero__main">
+      <p class="t-label hero__eyebrow" data-reveal="fade">
+        Стоматология · {clinic.city}
+      </p>
+
+      <!-- No reveal on the headline/lead: they are the LCP candidates and must paint without waiting for JS -->
+      <h1 id="hero-title" class="t-display hero__title">
+        Внимательная стоматология <em>и понятное лечение</em>
+      </h1>
+
+      <p class="t-body-lg hero__lead">
+        Понятно объясняем план лечения, его стоимость, сроки и&nbsp;гарантии.
+        Результаты консультации выдаём на&nbsp;руки&nbsp;— решение остаётся за&nbsp;вами.
+      </p>
+
+      <div class="btn-group hero__actions" data-reveal="slide" style="--reveal-delay: 3">
+        <Button href={clinic.phone.href} arrow block="mobile" data-book>{appointmentCta.labelLong}</Button>
+        <Button href="/skidki" variant="text">Действующие акции</Button>
+      </div>
+      </div>
+
+      <dl class="hero__facts" data-reveal="fade" style="--reveal-delay: 4">
+        <div>
+          <dt class="t-label">Адрес</dt>
+          <dd>{clinic.addressShort}</dd>
+        </div>
+        <div>
+          <dt class="t-label">Телефон</dt>
+          <dd><a class="hero__phone t-num" href={clinic.phone.href}>{clinic.phone.display}</a></dd>
+        </div>
+        <div>
+          <dt class="t-label">Время работы</dt>
+          <dd class="t-num">{clinic.hours[0].time}, вс — выходной</dd>
+        </div>
+      </dl>
+    </div>
+
+    <figure class="hero__media" data-reveal="image" style="--reveal-delay: 1">
+      {image ? (
+        <img
+          src={image.src}
+          alt={image.alt}
+          width={image.width}
+          height={image.height}
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+      ) : (
+        <div class="hero__placeholder" role="img" aria-label="Заглушка: фотография интерьера клиники">
+          <span class="hero__placeholder-lines" aria-hidden="true"></span>
+          <span class="hero__placeholder-text">
+            <span class="t-label">Заглушка · фото предоставит клиника</span>
+            <span class="hero__placeholder-title">Интерьер клиники</span>
+          </span>
+        </div>
+      )}
+    </figure>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: var(--space-4) var(--section-sm);
+    overflow-x: clip; /* full-bleed image must never cause horizontal scroll */
+  }
+
+  /* ---------- Mobile first: vertical ---------- */
+  .hero__grid {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  /* Mobile: flatten so facts can sit below the image (text → CTA → image → facts) */
+  .hero__content { display: contents; }
+  .hero__main { order: 1; }
+  .hero__media { order: 2; }
+  .hero__facts { order: 3; }
+
+  .hero__eyebrow { margin-bottom: var(--space-4); }
+
+  .hero__title {
+    max-width: 17ch;   /* two-to-three confident lines on desktop, not a narrow column */
+    font-size: clamp(2.625rem, 1.7rem + 4.6vw, 6rem); /* 42 @320 → 96 */
+    hyphens: manual;
+  }
+  .hero__title em { display: block; }
+
+  .hero__lead {
+    max-width: 34ch;
+    margin-top: var(--space-5);
+    color: var(--color-text-muted);
+  }
+
+  .hero__actions { margin-top: var(--space-6); }
+
+  .hero__facts {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-5);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border);
+  }
+  .hero__facts div { display: grid; gap: var(--space-1); align-content: start; }
+  .hero__facts div:last-child { grid-column: 1 / -1; }
+  .hero__facts dd {
+    margin: 0;
+    font-size: var(--size-small);
+    font-weight: var(--weight-medium);
+  }
+  .hero__phone {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    margin-block: -0.625rem;          /* keep the row's visual rhythm while enlarging the hit area */
+    transition: color var(--duration-fast) var(--ease-standard);
+  }
+  .hero__phone:hover { color: var(--color-text-accent); }
+
+  /* Image: full-bleed on mobile — edge to edge, no card */
+  .hero__media {
+    position: relative;
+    margin-inline: calc(var(--gutter) * -1); /* full-bleed; vw would include the scrollbar */
+    aspect-ratio: 4 / 5;
+    max-height: 70svh;
+    overflow: hidden;
+    background: var(--color-bg-subtle);
+  }
+  .hero__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 40%;
+  }
+
+  /* ---------- Placeholder ---------- */
+  .hero__placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-items: end;
+    padding: var(--space-5) var(--gutter);
+    background:
+      linear-gradient(160deg, var(--color-bg-accent) 0%, var(--color-bg-subtle) 100%);
+  }
+  /* Architectural line drawing: a window grid, not an illustration of people */
+  .hero__placeholder-lines {
+    position: absolute;
+    inset: 12% 14% 38% 14%;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
+    background:
+      linear-gradient(to right, transparent calc(50% - 0.5px), color-mix(in srgb, var(--color-accent) 35%, transparent) 0 calc(50% + 0.5px), transparent 0),
+      linear-gradient(to bottom, transparent calc(62% - 0.5px), color-mix(in srgb, var(--color-accent) 35%, transparent) 0 calc(62% + 0.5px), transparent 0);
+  }
+  .hero__placeholder-text {
+    position: relative;
+    display: grid;
+    gap: var(--space-2);
+    max-width: 30rem;
+    padding-top: var(--space-4);
+    border-top: 1px dashed var(--color-border-strong);
+  }
+  .hero__placeholder-title {
+    font-family: var(--font-display);
+    font-size: var(--size-h3);
+    line-height: 1.2;
+  }
+
+  /* Very small phones (320px): keep the CTA above the fold */
+  @media (max-width: 22.5rem) {
+    .hero__lead { font-size: var(--size-body); line-height: var(--leading-normal); }
+  }
+
+  /* ---------- Small tablets ---------- */
+  @media (min-width: 40rem) {
+    .hero__facts { grid-template-columns: repeat(3, auto); justify-content: start; column-gap: var(--space-7); }
+    .hero__facts div:last-child { grid-column: auto; }
+    .hero__media { aspect-ratio: 5 / 4; }
+  }
+
+  /* ---------- Desktop: editorial split, image bleeds to the right edge ---------- */
+  @media (min-width: 64rem) {
+    .hero { padding-block: var(--space-5) var(--section-md); }
+
+    /* Asymmetric split: tight text column (40) against a larger visual anchor (60) */
+    .hero__grid {
+      grid-template-columns: minmax(0, 9fr) minmax(0, 11fr);
+      gap: var(--col-gap-tight); /* intentional: supports the hero asymmetry */
+      align-items: start;
+      min-height: min(calc(100svh - var(--header-height) - var(--space-5) - 1px), 56rem); /* 1px = header hairline */
+    }
+
+    .hero__content {
+      display: grid;
+      align-content: space-between;
+      gap: var(--space-6);
+      /* Vertical step: the image starts at the grid top, the text ~32px lower */
+      padding-top: var(--space-6);
+      align-self: stretch;
+    }
+    .hero__main, .hero__media, .hero__facts { order: 0; }
+    /* Headline scales with viewport height too, so the whole hero fits above the fold */
+    /* Sized so «и понятное лечение» always fits one line in the 45% column → 3 lines, not 4 */
+    .hero__title { font-size: clamp(3.25rem, 0.4rem + 4.6vw, 4.75rem); }
+    .hero__facts { grid-template-columns: repeat(3, auto); justify-content: space-between; column-gap: var(--space-5); }
+    .hero__lead { max-width: 38ch; margin-top: calc(var(--space-6) + 0.75rem); }
+    .hero__actions { margin-top: var(--space-7); }
+
+    .hero__media {
+      /* Partial bleed past the container's right edge — gutter + 32px */
+      margin: 0 calc((var(--gutter) + var(--space-6)) * -1) 0 0;
+      aspect-ratio: auto;
+      max-height: none;
+      min-height: 34rem;
+      align-self: stretch;
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+      /* Layering: the panel crosses the section edge into the whitespace below */
+      position: relative;
+      z-index: 1;
+      margin-bottom: calc(var(--space-8) * -2.5);
+      box-shadow: var(--shadow-card);
+    }
+    .hero__placeholder { padding: var(--space-7); }
+  }
+
+  /* Beyond the wide container the bleed narrows but never squares off to the grid */
+  @media (min-width: 102rem) {
+    .hero__media { margin-right: calc(var(--space-8) * -1); }
+  }
+</style>

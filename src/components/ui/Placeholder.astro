@@ -1,0 +1,8 @@
+---
+// Visible stand-in for content the client must supply. Never ship silently.
+interface Props { label: string; ratio?: string; }
+const { label, ratio = '4 / 5' } = Astro.props;
+---
+<div class="media media--placeholder" style={`--ratio: ${ratio}`} role="img" aria-label={`Заглушка: ${label}`}>
+  <span class="t-label">Заглушка · {label}</span>
+</div>

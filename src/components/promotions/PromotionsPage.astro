@@ -1,0 +1,191 @@
+---
+// Promotions page body — rendered by src/pages/skidki.astro.
+// Structure: intro → featured → secondary → filterable list → conditions →
+//            promo FAQ (reused FaqSection) → closing CTA (reused FinalCta).
+// All content from data/promotions.ts and data/faq.ts (source: skidki.htm).
+import Section from '../layout/Section.astro';
+import PromotionCard from './PromotionCard.astro';
+import PromotionList from './PromotionList.astro';
+import FaqSection from '../sections/FaqSection.astro';
+import FinalCta from '../sections/FinalCta.astro';
+import InfoList from '../ui/InfoList.astro';
+import { faq } from '../../data/faq';
+import {
+  promotions,
+  promoValidity,
+  promoConditions,
+  featuredPromoId,
+  secondaryPromoIds,
+} from '../../data/promotions';
+
+const featured = promotions.find((p) => p.id === featuredPromoId)!;
+const secondary = secondaryPromoIds.map((id) => promotions.find((p) => p.id === id)!);
+const restCount = promotions.length - 1 - secondary.length;
+
+// Only the questions that concern promotions and paying for them
+const promoFaq = faq.filter((q) => ['combine-offers', 'cleaning', 'consultation-cost', 'installments', 'price-change'].includes(q.id));
+---
+<!-- 2. Introduction -->
+<Section width="wide" class="promos-intro">
+  <div class="promos-intro__grid">
+    <div class="promos-intro__head">
+      <p class="t-label" data-reveal="fade">Акции</p>
+      <h1 class="t-h1" data-reveal="slide">Действующие <em>предложения</em></h1>
+    </div>
+    <div class="promos-intro__aside" data-reveal="slide" style="--reveal-delay: 1">
+      <p class="promos-intro__lead">
+        {promotions.length} предложений клиники — с ценами, составом и условиями.
+        Акции можно совмещать.
+      </p>
+      <p class="promos-intro__validity">
+        <span class="promos-intro__dot" aria-hidden="true"></span>
+        {promoValidity.label}
+      </p>
+      <nav class="promos-intro__jump" aria-label="Разделы страницы">
+        <a href="#promos-all">Другие акции · {restCount}</a>
+        <a href="#promo-conditions">Условия</a>
+        <a href="#promo-faq">Вопросы</a>
+      </nav>
+    </div>
+  </div>
+</Section>
+
+<!-- 3. Featured promotion -->
+<Section width="wide" class="promos-featured" labelledby={`promo-${featured.id}-featured`}>
+  <p class="t-label promos-featured__label">Главное предложение</p>
+  <PromotionCard promo={featured} variant="featured" headingLevel="h2" />
+</Section>
+
+<!-- Secondary promotions -->
+<Section width="wide" labelledby="promos-secondary-title">
+  <div class="promos-block-head">
+    <p class="t-label">С чего начать</p>
+    <h2 id="promos-secondary-title" class="t-h3">Также в фокусе</h2>
+  </div>
+  <div class="promos-secondary">
+    {secondary.map((p) => <PromotionCard promo={p} variant="secondary" />)}
+  </div>
+</Section>
+
+<!-- 4–5. Filterable list -->
+<Section width="wide" tone="subtle" labelledby="promos-all-title" id="promos-all">
+  <div class="promos-block-head promos-block-head--lg">
+    <p class="t-label">Ещё {restCount} {restCount === 1 ? 'предложение' : restCount < 5 ? 'предложения' : 'предложений'}</p>
+    <h2 id="promos-all-title" class="t-h2">Другие <em>акции</em></h2>
+  </div>
+  <PromotionList exclude={[featuredPromoId, ...secondaryPromoIds]} />
+</Section>
+
+<!-- 6. Conditions -->
+<Section width="wide" labelledby="promo-conditions-title" id="promo-conditions" class="promo-conditions">
+  <div class="promo-conditions__grid">
+    <header class="promo-conditions__head">
+      <p class="t-label" data-reveal="fade">Условия</p>
+      <h2 id="promo-conditions-title" class="t-h2" data-reveal="slide">Как работают <em>акции</em></h2>
+      <p class="t-body t-muted" data-reveal="fade" style="--reveal-delay: 1">
+        Общие правила для всех предложений. Условия конкретной акции — в её карточке.
+      </p>
+    </header>
+    <InfoList items={promoConditions} />
+  </div>
+</Section>
+
+<!-- Promotion questions: same component as the homepage FAQ -->
+<FaqSection
+  id="promo-faq"
+  items={promoFaq}
+  tone="subtle"
+  eyebrow="Вопросы об акциях"
+  heading={{ lead: 'Частые', accent: 'вопросы' }}
+/>
+
+<!-- 7. Appointment CTA: same component as the homepage finale -->
+<FinalCta
+  id="promos-final"
+  label="Запись по акции"
+  heading={{ lead: 'Выберите акцию —', accent: 'мы запишем' }}
+  text="Назовите акцию администратору: он подберёт время и ответит на вопросы о составе и цене. Расширенная консультация стоматолога — бесплатно."
+  ctaLabel="Записаться на приём"
+/>
+
+<style>
+  /* ---------- Intro ---------- */
+  .promos-intro__grid { display: grid; gap: var(--space-6); }
+  .promos-intro__head { display: grid; gap: var(--space-4); }
+  .promos-intro__head em { display: block; }
+  .promos-intro__aside { display: grid; gap: var(--space-4); align-content: end; }
+  .promos-intro__lead { max-width: 40ch; font-size: var(--size-body-lg); line-height: var(--leading-relaxed); color: var(--color-text-muted); }
+  .promos-intro__validity {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-weight: var(--weight-medium);
+  }
+  .promos-intro__dot { flex: none; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--color-accent); }
+
+  .promos-intro__jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-5);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+  }
+  .promos-intro__jump a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    font-size: var(--size-small);
+    font-weight: var(--weight-medium);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    text-decoration-color: var(--color-border-strong);
+    transition: color var(--duration-fast) var(--ease-standard), text-decoration-color var(--duration-fast) var(--ease-standard);
+  }
+  .promos-intro__jump a:hover { color: var(--color-text-accent); text-decoration-color: currentColor; }
+
+  @media (min-width: 64rem) {
+    .promos-intro__grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: var(--col-gap);
+      align-items: end;
+    }
+  }
+
+  /* Phones: get to the featured price fast — the H1, deadline and jump links are enough */
+  @media (max-width: 63.99rem) {
+    .promos-intro__lead { display: none; }
+    .promos-featured__label { display: none; }
+    .promos-intro__aside { gap: var(--space-3); }
+  }
+
+  /* ---------- Featured ---------- */
+  .promos-featured__label { margin-bottom: var(--space-5); }
+
+  /* ---------- Block heads ---------- */
+  .promos-block-head { display: grid; gap: var(--space-2); margin-bottom: var(--space-6); }
+  .promos-block-head--lg { gap: var(--space-3); }
+  .promos-block-head :global(.t-h2 em) { font-style: italic; }
+
+  /* ---------- Secondary ---------- */
+  .promos-secondary { display: grid; gap: var(--grid-gap); }
+  @media (min-width: 48rem) {
+    .promos-secondary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  /* ---------- Conditions ---------- */
+  .promo-conditions__grid { display: grid; gap: var(--space-7); }
+  .promo-conditions__head { display: grid; gap: var(--space-4); align-content: start; }
+  .promo-conditions__head :global(.t-h2 em) { display: block; }
+  .promo-conditions__head .t-body { max-width: 34ch; }
+
+
+  @media (min-width: 64rem) {
+    .promo-conditions__grid {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+      gap: var(--col-gap);
+      align-items: start;
+    }
+    .promo-conditions__head { position: sticky; top: calc(var(--header-height) + var(--space-6)); }
+  }
+</style>

@@ -1,0 +1,168 @@
+---
+// Internal style guide — not part of the public site. Content samples are
+// taken verbatim from alfaklinik.ru/skidki.htm; anything else is a placeholder.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/layout/Section.astro';
+import Button from '../components/ui/Button.astro';
+import Card from '../components/ui/Card.astro';
+import Field from '../components/ui/Field.astro';
+import Placeholder from '../components/ui/Placeholder.astro';
+import Accordion from '../components/ui/Accordion.astro';
+
+const colors = [
+  ['--color-bg', '#F7F6F2', 'Фон'],
+  ['--color-bg-subtle', '#EEF0ED', 'Вторичный фон'],
+  ['--color-bg-accent', '#E5EFEC', 'Светлый акцент'],
+  ['--color-border', '#DDE1DE', 'Разделители'],
+  ['--color-border-strong', '#7A8582', 'Границы полей · 3.5:1'],
+  ['--color-text-muted', '#5A6563', 'Вторичный текст · 5.6:1'],
+  ['--color-accent', '#4F7773', 'Акцент · 4.6:1'],
+  ['--color-text-accent', '#3E625E', 'Акцентный текст · 6.2:1'],
+  ['--color-text', '#17201F', 'Текст · 15.6:1'],
+];
+const spaces = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+---
+<BaseLayout title="Дизайн-система — Альфа-Клиник" noindex>
+  <Section size="lg">
+    <p class="t-label" data-reveal="fade">Альфа-Клиник · Дизайн-система v0.1</p>
+    <h1 class="t-display" style="margin-top: var(--space-5)" data-reveal="slide">
+      Спокойная <em>точность</em><br />в каждой детали
+    </h1>
+    <p class="t-body-lg t-muted" style="margin-top: var(--space-6); --reveal-delay: 1" data-reveal="slide">
+      Внутренняя страница с токенами и компонентами. Не является частью сайта.
+    </p>
+  </Section>
+
+  <Section ruled>
+    <div class="section-head section-head--split">
+      <div class="stack stack--sm"><p class="t-label">01</p><h2 class="t-h2">Цвет</h2></div>
+      <p class="t-body t-muted">Семантические токены поверх палитры. Контраст указан относительно фона.</p>
+    </div>
+    <div class="grid grid--3">
+      {colors.map(([token, hex, name]) => (
+        <div class="stack stack--sm">
+          <div style={`aspect-ratio: 16/9; background: var(${token}); border: 1px solid var(--color-border); border-radius: var(--radius-sm)`}></div>
+          <p class="t-small">{name}</p>
+          <p class="t-small t-muted t-num"><code>{token}</code> · {hex}</p>
+        </div>
+      ))}
+    </div>
+  </Section>
+
+  <Section ruled>
+    <div class="section-head"><p class="t-label">02</p><h2 class="t-h2">Типографика</h2></div>
+    <div class="stack stack--lg">
+      <div><p class="t-label">Display · Cormorant Garamond</p><p class="t-display">Белоснежная улыбка</p></div>
+      <div><p class="t-label">H1</p><p class="t-h1">Лечебно-диагностические акции</p></div>
+      <div><p class="t-label">H2</p><p class="t-h2">Стоматологические <em>акции</em></p></div>
+      <div><p class="t-label">H3 · Manrope</p><p class="t-h3">Комплексная чистка всей полости рта</p></div>
+      <div><p class="t-label">Body large</p><p class="t-body-lg">Ультразвуковая чистка зубных отложений, осветляющая процедура «Air-Flow», лечебная обработка десен, полировка и фторирование всех зубов.</p></div>
+      <div><p class="t-label">Body</p><p class="t-body">Цены фиксированные, всё включено (анестезия, материалы, работа врача и т.д.).</p></div>
+      <div><p class="t-label">Small</p><p class="t-small t-muted">Запись по всем акциям проводится до 27 сентября 2026 года.</p></div>
+      <div><p class="t-label">Navigation</p>
+        <nav aria-label="Пример навигации" style="display: flex; gap: var(--space-6); flex-wrap: wrap">
+          <a class="nav-link t-nav" href="/skidki" aria-current="page">Акции</a>
+          <a class="nav-link t-nav" href="/#services">Услуги</a>
+          <a class="nav-link t-nav" href="/price">Цены</a>
+          <a class="nav-link t-nav" href="/contacts">Контакты</a>
+        </nav>
+      </div>
+    </div>
+  </Section>
+
+  <Section ruled>
+    <div class="section-head"><p class="t-label">03</p><h2 class="t-h2">Кнопки и ссылки</h2></div>
+    <div class="btn-group">
+      <Button arrow>Записаться</Button>
+      <Button variant="secondary">Прайс-лист</Button>
+      <Button variant="text" arrow>Все акции</Button>
+      <Button size="sm" variant="secondary">Малая</Button>
+      <Button disabled>Недоступна</Button>
+    </div>
+    <p class="t-body" style="margin-top: var(--space-7)">
+      Ссылка в тексте: <a class="link" href="tel:+74997395163">(499) 739-51-63</a> или <a class="link" href="mailto:info@alfaklinik.ru">info@alfaklinik.ru</a>.
+    </p>
+  </Section>
+
+  <Section tone="inverse">
+    <p class="t-label">На тёмном фоне</p>
+    <h2 class="t-h2" style="margin-block: var(--space-5) var(--space-7)">Москва, Воронцовские пруды, д.3</h2>
+    <div class="btn-group">
+      <Button arrow>Записаться</Button>
+      <Button variant="secondary">Позвонить</Button>
+      <Button variant="text">Контакты</Button>
+    </div>
+  </Section>
+
+  <Section>
+    <div class="section-head"><p class="t-label">04</p><h2 class="t-h2">Карточки</h2></div>
+    <div class="grid grid--3">
+      <Card variant="ruled">
+        <div slot="meta" class="card__meta"><span class="t-label">Ruled</span><span class="tag tag--accent">Акция</span></div>
+        <h3 class="t-h3">Комплексная чистка</h3>
+        <p class="t-small t-muted">7 процедур, включая «Air-Flow» и фторирование.</p>
+        <p slot="footer" class="t-h2 t-num">3 900 ₽</p>
+      </Card>
+      <Card variant="outline" href="#">
+        <div slot="meta" class="card__meta"><span class="t-label">Outline · interactive</span></div>
+        <h3 class="t-h3"><a class="card__link" href="#">Фотоотбеливание ZOOM 4</a></h3>
+        <p class="t-small t-muted">Все этапы включены.</p>
+        <p slot="footer" class="t-h2 t-num">17 900 ₽</p>
+      </Card>
+      <Card variant="tinted">
+        <div slot="meta" class="card__meta"><span class="t-label">Tinted</span></div>
+        <h3 class="t-h3">Коронка DUCERAM</h3>
+        <p class="t-small t-muted">Металлокерамика «под ключ», 1 единица.</p>
+        <p slot="footer" class="t-h2 t-num">12 700 ₽</p>
+      </Card>
+    </div>
+  </Section>
+
+  <Section ruled>
+    <div class="grid grid--editorial">
+      <div class="stack">
+        <p class="t-label">05</p><h2 class="t-h2">Формы</h2>
+        <p class="t-body t-muted">Поля 52px, шрифт 16px (без зума на iOS), граница 3.5:1.</p>
+      </div>
+      <form class="stack" onsubmit="return false">
+        <Field id="name" label="Имя" autocomplete="name" required />
+        <Field id="phone" type="tel" label="Телефон" autocomplete="tel" placeholder="+7" hint="Перезвоним для подтверждения записи" required />
+        <Field id="service" type="select" label="Услуга" options={['Комплексная чистка', 'Пломба', 'Отбеливание', 'Коронки']} />
+        <Field id="err" label="Пример ошибки" error="Проверьте номер телефона" />
+        <Field id="msg" type="textarea" label="Комментарий" />
+        <label class="check"><input type="checkbox" required /> Согласие на обработку персональных данных</label>
+        <Button type="submit" block="mobile">Отправить заявку</Button>
+      </form>
+    </div>
+  </Section>
+
+  <Section ruled>
+    <div class="section-head"><p class="t-label">06</p><h2 class="t-h2">Изображения</h2></div>
+    <div class="grid grid--editorial-rev">
+      <div class="media hover-zoom" style="--ratio: 3/2" data-reveal="image">
+        <img src="https://alfaklinik.ru/images/PanoramaClinic2.jpg" alt="Интерьер клиники Альфа-Клиник" loading="lazy" />
+      </div>
+      <Placeholder label="фото врача" />
+    </div>
+  </Section>
+
+  <Section ruled width="narrow">
+    <div class="section-head"><p class="t-label">07</p><h2 class="t-h2">Аккордеон</h2></div>
+    <Accordion items={[
+      { title: 'Акции суммируются?', body: 'Акции не исключают друг друга, с возможностью использования в любом количестве. Все включено.' },
+      { title: 'Есть ли отсрочка оплаты?', body: 'Возможность отсрочки по оплате (от 1 до 3 месяцев). Возможность кредитования.' },
+    ]} />
+  </Section>
+
+  <Section ruled>
+    <div class="section-head"><p class="t-label">08</p><h2 class="t-h2">Отступы</h2></div>
+    <div class="stack stack--sm">
+      {spaces.map((n) => (
+        <div style="display: flex; align-items: center; gap: var(--space-5)">
+          <code class="t-small t-muted" style="width: 6rem">--space-{n}</code>
+          <div style={`height: 8px; width: var(--space-${n}); background: var(--color-accent)`}></div>
+        </div>
+      ))}
+    </div>
+  </Section>
+</BaseLayout>

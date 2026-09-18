@@ -1,0 +1,111 @@
+---
+// Price / benefit block. Handles a single price, a tiered price table,
+// or a text benefit ("Бесплатно", "15%").
+import type { Promotion } from '../../data/promotions';
+import { formatRub as rub } from '../../utils/format';
+
+interface Props {
+  promo: Promotion;
+  size?: 'lg' | 'md';
+}
+const { promo: p, size = 'md' } = Astro.props;
+---
+<div class:list={['promo-price', `promo-price--${size}`]}>
+  {p.price != null && (
+    <p class="promo-price__main t-num">{rub(p.price)}</p>
+  )}
+
+  {p.price == null && !p.priceRows && p.benefit && (
+    <p class="promo-price__main">{p.benefit}</p>
+  )}
+
+  {p.priceRows && (
+    <>
+      {p.benefit && <p class="promo-price__eyebrow">{p.benefit}</p>}
+      <table class="promo-price__table">
+        <caption class="visually-hidden">Цены: {p.title}</caption>
+        <tbody>
+          {p.priceRows.map((row) => (
+            <tr>
+              <th scope="row">
+                {row.label}
+                {row.note && <span class="promo-price__was t-num">до скидки: {row.note}</span>}
+              </th>
+              <td class="t-num">{rub(row.price)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
+  )}
+
+  {p.benefitNote && <p class="promo-price__note">{p.benefitNote}</p>}
+
+  {(p.saving || p.comparison) && (
+    <p class="promo-price__compare">
+      {p.saving && <span class="chip-saving promo-price__saving">{p.saving}</span>}
+      {p.comparison && <span>{p.comparison}. По данным клиники.</span>}
+    </p>
+  )}
+</div>
+
+<style>
+  .promo-price { display: grid; gap: var(--space-2); }
+
+  .promo-price__main {
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-size: clamp(2.5rem, 2rem + 1.6vw, 3.25rem);
+    font-variant-numeric: lining-nums;
+  }
+  .promo-price--lg .promo-price__main { font-size: clamp(3.5rem, 2.4rem + 4vw, 6rem); }
+
+  .promo-price__eyebrow {
+    font-size: var(--size-small);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-accent);
+  }
+
+  .promo-price__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--size-small);
+  }
+  .promo-price__table tr { border-top: 1px solid var(--color-border); }
+  .promo-price__table tr:last-child { border-bottom: 1px solid var(--color-border); }
+  .promo-price__table th {
+    padding: var(--space-3) var(--space-4) var(--space-3) 0;
+    font-weight: var(--weight-regular);
+    text-align: left;
+    vertical-align: baseline;
+  }
+  .promo-price__table td {
+    padding: var(--space-3) 0;
+    text-align: right;
+    vertical-align: baseline;
+    white-space: nowrap;
+    font-family: var(--font-display);
+    font-size: 1.625rem;
+    font-weight: var(--weight-medium);
+    line-height: 1;
+  }
+  .promo-price__was {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: var(--size-label);
+    color: var(--color-text-muted);
+  }
+
+  .promo-price__note { font-size: var(--size-small); font-weight: var(--weight-medium); }
+
+  .promo-price__compare {
+    display: grid;
+    gap: 0.15rem;
+    font-size: var(--size-label);
+    line-height: 1.5;
+    color: var(--color-text-muted);
+  }
+  .promo-price__saving { margin-bottom: 0.2rem; }
+</style>

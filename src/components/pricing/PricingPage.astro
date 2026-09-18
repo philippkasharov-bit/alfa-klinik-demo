@@ -1,0 +1,86 @@
+---
+// /price page body. Reuses PricingSection (page mode), InfoList and FinalCta.
+import Section from '../layout/Section.astro';
+import PricingSection from './PricingSection.astro';
+import InfoList from '../ui/InfoList.astro';
+import FinalCta from '../sections/FinalCta.astro';
+import { pricing, pricingNotes } from '../../data/pricing';
+---
+<!-- 2. Introduction -->
+<Section width="wide" class="price-intro" labelledby="price-page-title">
+  <div class="price-intro__grid">
+    <div class="price-intro__head">
+      <p class="t-label" data-reveal="fade">Цены</p>
+      <h1 id="price-page-title" class="t-h1" data-reveal="slide">Стоимость <em>лечения</em></h1>
+    </div>
+    <div class="price-intro__aside" data-reveal="slide" style="--reveal-delay: 1">
+      <p class="price-intro__lead">{pricing.fixedCostNote}</p>
+      <p class="price-intro__notice">
+        <span class="price-intro__notice-label">Важно</span>
+        {pricing.sourceNotice}
+      </p>
+      <a class="btn btn--text price-intro__jump" href="#price-notes">Все условия и примечания</a>
+    </div>
+  </div>
+</Section>
+
+<!-- 3–5. Navigation + categories + expandable details -->
+<PricingSection mode="page" id="price" />
+
+<!-- 6. Important notes -->
+<Section width="wide" tone="subtle" labelledby="price-notes-title" id="price-notes" class="price-notes">
+  <div class="price-notes__grid">
+    <header class="price-notes__head">
+      <p class="t-label" data-reveal="fade">Примечания</p>
+      <h2 id="price-notes-title" class="t-h2" data-reveal="slide">Важно <em>о ценах</em></h2>
+    </header>
+    <InfoList items={pricingNotes} />
+  </div>
+</Section>
+
+<!-- 7. Appointment CTA -->
+<FinalCta
+  id="price-final"
+  label="Точная стоимость"
+  heading={{ lead: 'Узнайте цену', accent: 'для вашего случая' }}
+  text="Стоимость лечения определяется на первой консультации и не меняется до его завершения. Расширенная консультация стоматолога — бесплатно по акции клиники."
+  ctaLabel="Записаться на приём"
+/>
+
+<style>
+  .price-intro__grid { display: grid; gap: var(--space-5); }
+  .price-intro__head { display: grid; gap: var(--space-4); }
+  .price-intro__head :global(em) { display: block; }
+  .price-intro__aside { display: grid; gap: var(--space-4); align-content: end; }
+  .price-intro__lead { max-width: 40ch; font-size: var(--size-body-lg); line-height: var(--leading-relaxed); }
+  .price-intro__notice { display: grid; gap: var(--space-1); max-width: 44ch; font-size: var(--size-small); color: var(--color-text-muted); }
+  .price-intro__notice-label {
+    font-size: var(--size-label);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.01em;
+    color: var(--color-text-accent);
+  }
+  .price-intro__jump { justify-self: start; }
+
+  @media (max-width: 63.99rem) {
+    .price-intro__lead { font-size: var(--size-body); }
+  }
+  @media (min-width: 64rem) {
+    .price-intro__grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--col-gap); align-items: end; }
+  }
+
+  .price-notes__grid { display: grid; gap: var(--space-7); }
+  .price-notes__head { display: grid; gap: var(--space-4); align-content: start; }
+  .price-notes__head :global(em) { display: block; }
+  /* Ink rule separating headline from the notes — same device as About / Technology / Trust */
+  .price-notes__grid > :global(.info-list) { padding-top: var(--space-6); border-top: 1px solid var(--color-text); }
+  /* First row sits directly on the rule — no second hairline right under it */
+  .price-notes__grid > :global(.info-list > li:first-child) { padding-top: 0; border-top: 0; }
+  @media (min-width: 48rem) {
+    .price-notes__grid > :global(.info-list > li:nth-child(2)) { padding-top: 0; border-top: 0; }
+  }
+  @media (min-width: 64rem) {
+    .price-notes__grid > :global(.info-list) { padding-top: var(--space-5); }
+    .price-notes__grid { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: var(--col-gap); }
+  }
+</style>

@@ -1,0 +1,213 @@
+---
+// Treatment journey — horizontal timeline on desktop, vertical on mobile.
+// The rail "draws" when the list scrolls into view; steps follow in sequence.
+import Section from '../layout/Section.astro';
+import { journey } from '../../data/journey';
+---
+<Section join width="wide" ruled labelledby="journey-title" id="journey" class="journey">
+  <header class="journey__head">
+    <div class="journey__head-main">
+      <p class="t-label" data-reveal="fade">{journey.eyebrow}</p>
+      <h2 id="journey-title" class="t-h2" data-reveal="slide">
+        {journey.heading.lead}{' '}<em>{journey.heading.accent}</em>
+      </h2>
+    </div>
+    <p class="t-body t-muted journey__intro" data-reveal="fade" style="--reveal-delay: 1">{journey.intro}</p>
+  </header>
+
+  <div class="journey__track">
+    <span class="journey__rail" data-reveal="rail" aria-hidden="true"></span>
+
+    <ol class="journey__steps" role="list">
+      {journey.steps.map((step, i) => (
+        <li class="journey__step" data-reveal="slide" style={`--reveal-delay: ${i + 1}`}>
+          <span class="journey__tick" aria-hidden="true"></span>
+          <span class="journey__num t-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <div class="journey__body">
+            <h3 class="journey__title">
+              <span class="visually-hidden">Шаг {i + 1}. </span>{step.title}
+            </h3>
+            <p class="journey__text">{step.text}</p>
+            {step.note && <p class="journey__note">{step.note}</p>}
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</Section>
+
+<style>
+  /* ---------- Head ---------- */
+  .journey__head {
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+  }
+  .journey__head-main { display: grid; gap: var(--space-4); }
+  .journey__head .t-h2 em { display: inline; font-style: normal; } /* one continuous phrase — split-italic is reserved for hero / offer / final */
+  .journey__intro { max-width: 36ch; }
+
+  @media (min-width: 64rem) {
+    .journey__head { margin-bottom: var(--space-9); }
+    .journey__intro { max-width: 44ch; }
+  }
+
+  /* ---------- Track (mobile first: vertical) ---------- */
+  .journey__track {
+    --rail-x: 1.25rem;         /* centre of the number column */
+    position: relative;
+  }
+
+  /* Mobile: the rail is drawn per step (number → next number), so it never runs past the last step */
+  .journey__rail { display: none; }
+  .journey__step:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: var(--rail-x);
+    top: 2.6rem;
+    bottom: 0.4rem;
+    width: 1px;
+    background: var(--color-border-strong);
+    transform-origin: top;
+    transition: transform var(--duration-reveal) var(--ease-in-out) calc(var(--reveal-delay, 0) * 80ms + 200ms);
+  }
+  :global(.js-motion) .journey__step:not(:global(.is-visible))::before { transform: scaleY(0); }
+
+  .journey__steps {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .journey__step {
+    position: relative;
+    display: grid;
+    grid-template-columns: calc(var(--rail-x) * 2) minmax(0, 1fr);
+    column-gap: var(--space-4);
+    padding-bottom: var(--space-7);
+  }
+  .journey__step:last-child { padding-bottom: 0; }
+
+  /* Tick: a short horizontal hairline crossing the rail — no circles */
+  .journey__tick {
+    position: absolute;
+    left: calc(var(--rail-x) - 0.5rem);
+    top: 1.05rem;
+    width: 1rem;
+    height: 1px;
+    background: var(--color-text);
+  }
+
+  .journey__num {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: center;
+    align-self: start;
+    position: relative;
+    z-index: 1;
+    padding-block: 0.1rem;
+    background: var(--color-bg);          /* masks the rail behind the number (section is on --color-bg) */
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.375rem;
+    line-height: 1.6;
+    color: var(--color-text-accent);
+  }
+  .journey__tick { display: none; }       /* mobile: the number itself sits on the rail */
+
+  .journey__body { grid-column: 2; display: grid; gap: var(--space-2); align-content: start; }
+
+  .journey__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+    font-size: var(--size-title-sm);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    padding-top: 0.2rem;
+  }
+  .journey__text {
+    max-width: 34ch;
+    font-size: var(--size-small);
+    line-height: var(--leading-normal);
+    color: var(--color-text-muted);
+  }
+  .journey__note {
+    justify-self: start;
+    margin-top: var(--space-1);
+    padding: 0.25rem 0.6rem;
+    background: var(--color-accent-soft);
+    border-radius: var(--radius-xs);
+    font-size: var(--size-label);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.02em;
+    color: var(--color-text-accent);
+  }
+
+  /* ---------- Desktop: horizontal timeline ---------- */
+  @media (min-width: 64rem) {
+    .journey__track { --rail-y: 3.25rem; }
+
+    .journey__step:not(:last-child)::before { display: none; }
+    .journey__rail {
+      display: block;
+      position: absolute;
+      background: var(--color-text);
+      transition: transform calc(var(--duration-reveal) * 1.6) var(--ease-in-out);
+      left: 0;
+      right: 0;
+      top: var(--rail-y);
+      bottom: auto;
+      width: auto;
+      height: 1px;
+      transform-origin: left;
+    }
+    :global(.js-motion) .journey__rail:not(:global(.is-visible)) { transform: scaleX(0); }
+
+    .journey__steps {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      column-gap: var(--grid-gap);
+    }
+    .journey__step {
+      grid-template-columns: 1fr;
+      grid-template-rows: var(--rail-y) auto;
+      padding: 0;
+    }
+
+    /* Large numeral sits above the rail, tick drops through it */
+    .journey__num {
+      grid-row: 1;
+      justify-self: start;
+      align-self: end;
+      padding: 0 0 var(--space-3);
+      background: none;
+      font-size: clamp(2.25rem, 1.2rem + 1.6vw, 3rem);
+      line-height: 1;
+    }
+    .journey__tick {
+      display: block;
+      left: 0;
+      top: calc(var(--rail-y) - 0.5rem);
+      width: 1px;
+      height: 1rem;
+    }
+    .journey__body {
+      grid-column: 1;
+      grid-row: 2;
+      padding-top: var(--space-6);
+      padding-right: var(--space-3);
+    }
+
+    /* Subtle hover: the step's tick grows and the title shifts */
+    .journey__tick { transition: transform var(--duration-base) var(--ease-out); }
+    .journey__title { transition: transform var(--duration-base) var(--ease-out); }
+    .journey__step:hover .journey__tick { transform: scaleY(2); }   /* compositor-only */
+    .journey__step:hover .journey__title { transform: translateX(0.25rem); }
+  }
+
+  /* Compact desktop: five narrow columns — keep every title on one line */
+  @media (min-width: 64rem) and (max-width: 79.99rem) {
+    .journey__title { font-size: var(--size-title-sm); }
+  }
+</style>

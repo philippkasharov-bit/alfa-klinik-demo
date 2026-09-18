@@ -1,0 +1,557 @@
+---
+// Price guide: category navigation + one accordion per category + appointment CTA.
+// Reused on the homepage and on /price.
+import Section from '../layout/Section.astro';
+import Button from '../ui/Button.astro';
+import PriceRowItem from './PriceRow.astro';
+import { pricing, offerNote } from '../../data/pricing';
+import { clinic } from '../../data/clinic';
+
+interface Props {
+  /** Which category starts open */
+  openFirst?: boolean;
+  /** Collapse all categories on phones (homepage: keeps the page short) */
+  collapseOnMobile?: boolean;
+  headingLevel?: 'h1' | 'h2';
+  id?: string;
+  /** section: homepage block (accordions, own heading + CTA). page: /price body (headed groups, sticky nav, no own heading/CTA) */
+  mode?: 'section' | 'page';
+}
+const { openFirst = true, collapseOnMobile = false, headingLevel = 'h2', id = 'prices', mode = 'section' } = Astro.props;
+const isPage = mode === 'page';
+const plural = (n: number) => `${n} ${n === 1 ? 'позиция' : n < 5 ? 'позиции' : 'позиций'}`;
+const H = headingLevel;
+const realCount = (rows: { placeholder?: boolean }[]) => rows.filter((r) => !r.placeholder).length;
+// Categories without published prices: grouped into one note on /price instead of empty sections
+const pricedCats = pricing.categories.filter((c) => realCount(c.rows) > 0);
+const pendingCats = pricing.categories.filter((c) => realCount(c.rows) === 0);
+const pendingId = `${id}-on-request`;
+const pendingList = pendingCats
+  .map((c, i) => (i === 0 ? c.title : c.title.toLowerCase()))
+  .reduce((acc, t, i, arr) => (i === 0 ? t : `${acc}${i === arr.length - 1 ? ' и ' : ', '}${t}`), '');
+---
+<Section width="wide" labelledby={`${id}-title`} id={id} class:list={['pricing', isPage && 'pricing--page']}>
+  {isPage && <h2 id={`${id}-title`} class="visually-hidden">Прайс-лист по разделам</h2>}
+  {!isPage && (
+  <header class="pricing__head">
+    <div class="pricing__head-main">
+      <p class="t-label" data-reveal="fade">{pricing.eyebrow}</p>
+      <H id={`${id}-title`} class="t-h2" data-reveal="slide">
+        {pricing.heading.lead}{' '}<em>{pricing.heading.accent}</em>
+      </H>
+    </div>
+
+    <div class="pricing__notices" data-reveal="fade" style="--reveal-delay: 1">
+      <p class="pricing__notice pricing__notice--primary">{pricing.fixedCostNote}</p>
+    </div>
+  </header>
+  )}
+
+  <!-- Always-true starting point -->
+  <div class="pricing__free" data-reveal="slide">
+    <div>
+      <p class="t-label">С чего начать</p>
+      <p class="pricing__free-name">{pricing.freeConsultation.name}</p>
+      <p class="pricing__free-detail">{pricing.freeConsultation.detail}</p>
+      <p class="pricing__free-condition">{pricing.freeConsultation.condition}</p>
+    </div>
+    <p class="pricing__free-price">{pricing.freeConsultation.priceText}</p>
+  </div>
+
+  <div class:list={['pricing__layout', isPage && 'pricing__layout--page']} data-pricing data-spy={isPage ? '' : undefined} data-collapse-mobile={collapseOnMobile ? '' : undefined}>
+    <!-- Category navigation (/price only — the homepage block has just two categories) -->
+    {isPage && (
+    <nav class="pricing__nav" aria-label="Разделы прайс-листа">
+      <ul role="list">
+        {[...pricedCats, ...pendingCats].map((c, i) => {
+          const count = realCount(c.rows);
+          const spy = count === 0 ? pendingId : `${id}-${c.id}`;
+          return (
+            <li data-reveal="slide" style={`--reveal-delay: ${Math.min(i, 5)}`}>
+              <a href={`#${id}-${c.id}`} data-pricing-link={`${id}-${c.id}`} data-spy-link={spy}>
+                <span>{c.title}</span>
+                {count > 0
+                  ? <span class="pricing__nav-count t-num">{count}</span>
+                  : <span class="pricing__nav-count pricing__nav-count--pending">уточняется</span>}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+    )}
+
+    <!-- Categories -->
+    {isPage ? (
+    <div class="pricing__groups">
+      {pricedCats.map((c) => {
+        const count = realCount(c.rows);
+        return (
+          <section class="pricing__group" id={`${id}-${c.id}`} aria-labelledby={`${id}-${c.id}-title`} data-spy-target>
+            <header class="pricing__group-head">
+              <h3 id={`${id}-${c.id}-title`} class="pricing__group-title">{c.title}</h3>
+              <p class="pricing__group-meta">{`${plural(count)} по акции`}</p>
+            </header>
+            <p class="pricing__offer-note">{offerNote}</p>
+            <ul class="pricing__rows" role="list">
+              {c.rows.filter((r) => !r.placeholder).map((row) => <PriceRowItem row={row} />)}
+            </ul>
+          </section>
+        );
+      })}
+
+      {pendingCats.length > 0 && (
+        <aside class="pricing__on-request" id={pendingId} aria-label="Стоимость по запросу" data-spy-target>
+          {/* Keep old deep links (/price#prices-surgery …) working */}
+          {pendingCats.map((c) => <span class="pricing__anchor" id={`${id}-${c.id}`}></span>)}
+          <p class="pricing__notice pricing__notice--primary">
+            <span class="pricing__notice-label">Стоимость по запросу</span>
+            <span>
+              {pendingList} — стоимость уточняйте у администратора по телефону{' '}
+              <a class="link t-num" href={clinic.phone.href}>{clinic.phone.display}</a>.
+            </span>
+          </p>
+        </aside>
+      )}
+    </div>
+    ) : (
+    <div class="pricing__categories">
+      <p class="pricing__offer-note">{offerNote}</p>
+      {pricedCats.map((c, i) => (
+        <details class="pricing__cat" id={`${id}-${c.id}`} open={openFirst && i === 0 && !collapseOnMobile}>
+          <summary class="pricing__cat-summary">
+            <span class="pricing__cat-title">{c.title}</span>
+            <span class="pricing__cat-meta">{plural(realCount(c.rows))} по акции</span>
+            <span class="accordion__icon" aria-hidden="true"></span>
+          </summary>
+          <ul class="pricing__rows" role="list">
+            {c.rows.filter((r) => !r.placeholder).map((row) => <PriceRowItem row={row} />)}
+          </ul>
+        </details>
+      ))}
+
+      {pendingCats.length > 0 && (
+        <p class="pricing__on-request-line">
+          {pendingList} — стоимость назовёт администратор по телефону{' '}
+          <a class="link t-num" href={clinic.phone.href}>{clinic.phone.display}</a>.
+        </p>
+      )}
+
+      <div class="pricing__footnotes">
+        <p>{pricing.giftNote}</p>
+        <p>{pricing.sourceNotice}</p>
+      </div>
+    </div>
+    )}
+  </div>
+
+  <!-- Appointment CTA (homepage section only; /price uses the shared FinalCta) -->
+  {!isPage && (
+  <div class="pricing__cta" data-reveal="slide">
+    <div class="pricing__cta-text">
+      <p class="pricing__cta-title">Узнать точную стоимость</p>
+      <p class="pricing__cta-sub">Администратор назовёт актуальную цену и запишет на бесплатную консультацию.</p>
+    </div>
+    <div class="pricing__cta-actions">
+      <a class="pricing__cta-phone t-num" href={clinic.phone.href}>{clinic.phone.display}</a>
+      <Button href={clinic.phone.href} arrow block="mobile" data-book>Записаться на приём</Button>
+    </div>
+  </div>
+  )}
+</Section>
+
+<script>
+  // Nav links open the target category before the browser scrolls to it.
+  document.querySelectorAll<HTMLElement>('[data-pricing]').forEach((root) => {
+    root.querySelectorAll<HTMLAnchorElement>('[data-pricing-link]').forEach((a) => {
+      a.addEventListener('click', () => {
+        const target = document.getElementById(a.dataset.pricingLink!) as HTMLDetailsElement | null;
+        if (target) target.open = true;
+      });
+    });
+    // Rendered collapsed (mobile-first, so phones never see a shift); desktop opens the first category.
+    if (root.hasAttribute('data-collapse-mobile') && window.matchMedia('(min-width: 64rem)').matches) {
+      const first = root.querySelector<HTMLDetailsElement>('details.pricing__cat');
+      if (first) first.open = true;
+    }
+    // Page mode: highlight the category in view; keep the active chip visible on phones.
+    if (root.hasAttribute('data-spy')) {
+      const links = [...root.querySelectorAll<HTMLAnchorElement>('[data-spy-link]')];
+      const targets = [...root.querySelectorAll<HTMLElement>('[data-spy-target]')];
+      const strip = root.querySelector<HTMLElement>('.pricing__nav ul');
+      let current = '';
+      let ticking = false;
+      const update = () => {
+        ticking = false;
+        const line = window.innerHeight * 0.35;
+        let active = targets[0];
+        for (const t of targets) if (t.getBoundingClientRect().top <= line) active = t;
+        if (!active || active.id === current) return;
+        current = active.id;
+        links.forEach((a) => {
+          const on = a.dataset.spyLink === current;
+          a.classList.toggle('is-current', on);
+          if (on) a.setAttribute('aria-current', 'location');
+          else a.removeAttribute('aria-current');
+          if (on && strip && strip.scrollWidth > strip.clientWidth) {
+            const left = a.offsetLeft - (strip.clientWidth - a.offsetWidth) / 2;
+            strip.scrollTo({ left, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+          }
+        });
+      };
+      const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+      window.addEventListener('scroll', request, { passive: true });
+      window.addEventListener('resize', request, { passive: true });
+      update();
+    }
+    // Deep link support: /price#prices-orthopedics
+    const hash = decodeURIComponent(location.hash.slice(1));
+    const fromHash = hash && (document.getElementById(hash) as HTMLDetailsElement | null);
+    if (fromHash && fromHash.tagName === 'DETAILS') fromHash.open = true;
+  });
+</script>
+
+<style>
+  /* ---------- Head ---------- */
+  .pricing__head { display: grid; gap: var(--space-6); margin-bottom: var(--space-7); }
+  .pricing__head-main { display: grid; gap: var(--space-4); }
+  .pricing__head :global(.t-h2 em) { display: inline; font-style: normal; } /* one continuous phrase — split-italic is reserved for hero / offer / final */
+
+  .pricing__notices { display: grid; gap: var(--space-3); max-width: 44ch; align-content: end; }
+  .pricing__notice { font-size: var(--size-small); color: var(--color-text-muted); }
+  .pricing__notice--primary {
+    display: grid;
+    gap: var(--space-1);
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--color-accent);
+    color: var(--color-text);
+  }
+  .pricing__notice-label {
+    font-size: var(--size-label);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.01em;
+    color: var(--color-text-accent);
+  }
+
+  @media (min-width: 64rem) {
+    .pricing__head {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+      align-items: end;
+      column-gap: var(--grid-gap);
+      margin-bottom: var(--space-8);
+    }
+  }
+
+  /* ---------- Free consultation strip ---------- */
+  .pricing__free {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: var(--space-3) var(--space-5);
+    margin-bottom: var(--space-8);
+    padding: var(--space-5);
+    background: var(--color-bg-accent);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-card);
+  }
+  /* Layering: the callout lifts out of its section and straddles the edge above it */
+  @media (min-width: 64rem) {
+    :global(.pricing--page) .pricing__free {
+      position: relative;
+      z-index: 1;
+      margin-top: calc(var(--space-8) * -1);
+    }
+  }
+  .pricing__free > div { display: grid; gap: var(--space-2); }
+  .pricing__free-name {
+    font-family: var(--font-display);
+    font-size: var(--size-title-sm);
+    font-weight: var(--weight-medium);
+    line-height: 1.15;
+  }
+  .pricing__free-detail { font-size: var(--size-small); color: var(--color-text-muted); max-width: 60ch; }
+  .pricing__free-condition { font-size: var(--size-label); font-weight: var(--weight-semibold); color: var(--color-text-accent); }
+  .pricing__free-price {
+    font-family: var(--font-display);
+    font-size: var(--size-title-sm);
+    font-style: italic;
+    line-height: 1;
+    color: var(--color-text-accent);
+  }
+  @media (max-width: 39.99rem) {
+    .pricing__free { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Layout: nav + categories ---------- */
+  /* minmax(0, 1fr): the chip row is wider than the screen and must scroll, not stretch the grid */
+  .pricing__layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+  .pricing__nav { min-width: 0; }
+
+  .pricing__nav ul {
+    display: flex;
+    gap: var(--space-2);
+    margin: 0 calc(var(--gutter) * -1);
+    padding: 0 var(--gutter) var(--space-2);
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .pricing__nav ul::-webkit-scrollbar { display: none; }
+  @media (max-width: 39.99rem) {
+      .pricing__free { margin-bottom: var(--space-6); padding: var(--space-4); }
+    .pricing__head { margin-bottom: var(--space-6); }
+    .pricing__cta { margin-top: var(--space-7); }
+  }
+  .pricing__nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--touch-target);
+    padding: 0 var(--space-4);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    font-size: var(--size-small);
+    font-weight: var(--weight-medium);
+    white-space: nowrap;
+    transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard);
+  }
+  .pricing__nav a:hover { border-color: var(--color-text); }
+  .pricing__nav-count { font-size: var(--size-label); color: var(--color-text-muted); }
+  .pricing__nav-count--pending { font-weight: var(--weight-regular, 400); letter-spacing: 0.01em; }
+
+  @media (min-width: 64rem) {
+    .pricing__layout {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 8fr);
+      gap: var(--col-gap);
+      align-items: start;
+    }
+    .pricing__nav {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-6));
+    }
+    .pricing__nav ul {
+      display: grid;
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+      border-top: 1px solid var(--color-text);
+    }
+    .pricing__nav a {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding: var(--space-3) 0;
+      border: 0;
+      border-bottom: 1px solid var(--color-border);
+      border-radius: 0;
+      white-space: normal;
+    }
+    .pricing__nav a:hover { color: var(--color-text-accent); }
+    .pricing__nav a:focus-visible { border-radius: var(--radius-xs); }
+  }
+
+  /* ---------- Category accordions ---------- */
+  .pricing__categories { border-top: 1px solid var(--color-text); }
+
+  .pricing__cat {
+    border-bottom: 1px solid var(--color-border);
+    scroll-margin-top: calc(var(--header-height) + var(--space-5));
+    interpolate-size: allow-keywords;
+  }
+  .pricing__cat-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "title icon" "meta icon";
+    align-items: center;
+    column-gap: var(--space-4);
+    min-height: 4.5rem;
+    padding-block: var(--space-4);
+    cursor: pointer;
+    list-style: none;
+  }
+  .pricing__cat-summary::-webkit-details-marker { display: none; }
+  .pricing__cat-title {
+    grid-area: title;
+    font-family: var(--font-display);
+    font-size: var(--size-row);
+    font-weight: var(--weight-medium);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .pricing__cat-meta { grid-area: meta; font-size: var(--size-small); color: var(--color-text-muted); }
+  .pricing__cat-summary .accordion__icon { grid-area: icon; }
+  .pricing__cat[open] .accordion__icon::after { transform: rotate(0deg); }
+  .pricing__cat-summary:hover .pricing__cat-title { color: var(--color-text-accent); }
+
+  .pricing__cat::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition: block-size var(--duration-base) var(--ease-out), content-visibility var(--duration-base) allow-discrete;
+  }
+  .pricing__cat[open]::details-content { block-size: auto; }
+
+  .pricing__rows {
+    margin: 0;
+    padding: 0 0 var(--space-6);
+    list-style: none;
+    border-top: 1px solid var(--color-border);
+  }
+  @media (min-width: 64rem) {
+    .pricing__cat-summary {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      grid-template-areas: "title meta icon";
+      column-gap: var(--space-6);
+    }
+  }
+
+  /* Homepage block: no sidebar, the list takes the full width */
+  .pricing__layout:not(.pricing__layout--page) { grid-template-columns: minmax(0, 1fr); }
+  .pricing__categories > .pricing__offer-note { margin: var(--space-4) 0; }
+
+  .pricing__on-request-line {
+    max-width: 62ch;
+    padding-block: var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+    font-size: var(--size-small);
+    color: var(--color-text-muted);
+  }
+  .pricing__footnotes {
+    display: grid;
+    gap: var(--space-1);
+    margin-top: var(--space-5);
+    max-width: 62ch;
+    font-size: var(--size-label);
+    line-height: 1.5;
+    color: var(--color-text-muted);
+  }
+
+  /* =========================== PAGE MODE =========================== */
+  .pricing__groups { display: grid; gap: var(--space-9); min-width: 0; }
+  .pricing__group { scroll-margin-top: calc(var(--header-height) + 4.5rem); }
+  .pricing__group-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-5);
+    margin-bottom: var(--space-4);
+  }
+  .pricing__group-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+    font-size: var(--size-title);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    overflow-wrap: break-word;
+  }
+  .pricing__group-meta { font-size: var(--size-small); color: var(--color-text-muted); }
+  .pricing--page .pricing__rows { border-top: 0; padding-bottom: 0; }
+  .pricing--page .pricing__offer-note { margin-bottom: var(--space-3); }
+  .pricing__on-request { position: relative; }
+  .pricing__on-request .pricing__notice--primary { max-width: 60ch; font-size: var(--size-body); padding-block: var(--space-1); }
+  .pricing__anchor { position: absolute; top: 0; scroll-margin-top: calc(var(--header-height) + 4.5rem); }
+
+  /* Nav: current category */
+  .pricing__nav a.is-current { color: var(--color-text-accent); }
+  .pricing__nav a.is-current .pricing__nav-count { color: var(--color-text-accent); }
+
+  /* Phones & tablets: sticky, swipeable category bar under the header */
+  @media (max-width: 63.99rem) {
+    .pricing__layout--page .pricing__nav {
+      position: sticky;
+      top: var(--header-height);
+      z-index: 5;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-block: var(--space-2);
+      background: color-mix(in srgb, var(--color-bg) 94%, transparent);
+      backdrop-filter: saturate(1.2) blur(8px);
+      border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+    }
+    .pricing__layout--page .pricing__nav ul { margin: 0; scroll-padding-inline: var(--gutter); scroll-snap-type: x proximity; }
+    .pricing__layout--page .pricing__nav li { scroll-snap-align: start; }
+    .pricing__layout--page .pricing__nav a { border-color: var(--color-border); background: var(--color-bg); }
+    .pricing__layout--page .pricing__nav a.is-current { border-color: var(--color-text); background: var(--color-text); color: var(--color-bg); }
+    .pricing__layout--page .pricing__nav a.is-current .pricing__nav-count { color: color-mix(in srgb, var(--color-bg) 70%, transparent); }
+    .pricing__groups { gap: var(--space-8); }
+  }
+
+  /* Desktop: quieter nav list — typography, not boxes */
+  @media (min-width: 64rem) {
+    .pricing__layout--page .pricing__nav ul { border-top: 0; }
+    .pricing__layout--page .pricing__nav a {
+      border-bottom: 0;
+      padding: var(--space-2) 0;
+      font-size: var(--size-body);
+      color: var(--color-text-muted);
+      transition: color var(--duration-fast) var(--ease-standard);
+    }
+    .pricing__layout--page .pricing__nav a.is-current { color: var(--color-text); font-weight: var(--weight-semibold); }
+    /* Current marker: transform-only (no layout animation) — the rule draws in, the label slides over */
+    .pricing__layout--page .pricing__nav a { position: relative; }
+    .pricing__layout--page .pricing__nav a::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 1.25rem;
+      height: 1px;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform var(--duration-base) var(--ease-out);
+    }
+    .pricing__layout--page .pricing__nav a.is-current::before { transform: scaleX(1); }
+    .pricing__layout--page .pricing__nav a > span:first-child {
+      transition: transform var(--duration-base) var(--ease-out);
+    }
+    .pricing__layout--page .pricing__nav a > .pricing__nav-count { margin-left: auto; }
+    .pricing__layout--page .pricing__nav a.is-current > span:first-child { transform: translateX(calc(1.25rem + var(--space-3))); }
+  }
+
+  /* ---------- CTA ---------- */
+  .pricing__cta {
+    display: grid;
+    gap: var(--space-5);
+    margin-top: var(--space-9);
+    padding: clamp(1.5rem, 1rem + 3vw, 3.5rem);
+    background: var(--color-bg-inverse);
+    color: var(--color-text-inverse);
+    border-radius: var(--radius-sm);
+  }
+  .pricing__cta :global(:focus-visible) { outline-color: var(--color-text-inverse); }
+  .pricing__cta { grid-template-columns: minmax(0, 1fr); }
+  /* Long CTA label may wrap on the narrowest phones instead of overflowing */
+  .pricing__cta :global(.btn) { white-space: normal; text-align: center; line-height: 1.25; padding-block: var(--space-3); }
+  .pricing__cta-text { display: grid; gap: var(--space-2); }
+  .pricing__cta-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.875rem, 1.4rem + 1.8vw, 3rem);
+    line-height: 1.05;
+  }
+  .pricing__cta-sub { max-width: 44ch; color: color-mix(in srgb, var(--color-text-inverse) 72%, transparent); }
+  .pricing__cta-actions { display: grid; gap: var(--space-4); justify-items: start; align-content: end; }
+  .pricing__offer-note {
+    margin: 0 0 var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-accent-soft);
+    border-radius: var(--radius-xs);
+    font-size: var(--size-small);
+    color: var(--color-text-accent);
+  }
+  .pricing__cta-phone {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+    line-height: 1;
+  }
+  .pricing__cta :global(.btn--primary:focus-visible) { outline-color: var(--color-text-inverse); }
+
+  @media (min-width: 64rem) {
+    .pricing__cta { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: end; }
+    .pricing__cta-actions { justify-items: end; }
+  }
+</style>

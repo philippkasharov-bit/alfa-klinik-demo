@@ -1,0 +1,13 @@
+/* Self-hosted fonts (@fontsource). Only weights actually used, only Cyrillic + Latin.
+   Each subset carries a unicode-range, so a Russian page downloads the Cyrillic file
+   plus Latin only where Latin glyphs appear (brand names, digits). font-display: swap. */
+@import '@fontsource/manrope/cyrillic-400.css';
+@import '@fontsource/manrope/latin-400.css';
+@import '@fontsource/manrope/cyrillic-500.css';
+@import '@fontsource/manrope/latin-500.css';
+@import '@fontsource/manrope/cyrillic-600.css';
+@import '@fontsource/manrope/latin-600.css';
+@import '@fontsource/cormorant-garamond/cyrillic-500.css';
+@import '@fontsource/cormorant-garamond/latin-500.css';
+@import '@fontsource/cormorant-garamond/cyrillic-500-italic.css';
+@import '@fontsource/cormorant-garamond/latin-500-italic.css';

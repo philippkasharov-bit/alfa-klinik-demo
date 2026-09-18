@@ -1,0 +1,218 @@
+---
+// FAQ — native <details>/<summary> accordion:
+//   keyboard: Tab to a question, Enter/Space toggles (built into the element)
+//   screen readers: announced as expandable, state exposed natively
+//   animation: ::details-content height transition (progressive; instant elsewhere)
+import Section from '../layout/Section.astro';
+import Button from '../ui/Button.astro';
+import { faq, type FaqItem } from '../../data/faq';
+import { clinic } from '../../data/clinic';
+
+interface Props {
+  id?: string;
+  items?: FaqItem[];
+  eyebrow?: string;
+  heading?: { lead: string; accent: string };
+  intro?: string;
+  tone?: 'default' | 'subtle';
+}
+const {
+  id = 'faq',
+  items = faq,
+  eyebrow = 'Вопросы и ответы',
+  heading = { lead: 'Частые', accent: 'вопросы' },
+  intro = 'Не нашли ответ? Позвоните — администратор подскажет.',
+  tone = 'default',
+} = Astro.props;
+---
+<Section size="md" width="wide" tone={tone} ruled={tone === 'default'} labelledby={`${id}-title`} id={id} class="faq">
+  <div class="faq__grid">
+    <header class="faq__head">
+      <p class="t-label" data-reveal="fade">{eyebrow}</p>
+      <h2 id={`${id}-title`} class="t-h2" data-reveal="slide">
+        {heading.lead}{' '}<em>{heading.accent}</em>
+      </h2>
+      <p class="t-body t-muted faq__intro" data-reveal="fade" style="--reveal-delay: 1">{intro}</p>
+      <div class="faq__contact" data-reveal="fade" style="--reveal-delay: 2">
+        <a class="faq__phone t-num" href={clinic.phone.href}>{clinic.phone.display}</a>
+        <Button href={clinic.phone.href} variant="secondary" size="sm" arrow>Позвонить</Button>
+      </div>
+    </header>
+
+    <div class="faq__list">
+      {items.map((item, i) => (
+        <details
+          class="faq__item"
+          id={`${id}-${item.id}`}
+          name={`${id}-accordion`}
+          data-reveal="slide"
+          style={`--reveal-delay: ${Math.min(i, 5)}`}
+        >
+          <summary class="faq__question">
+            <span class="faq__question-text">{item.question}</span>
+            <span class="faq__icon" aria-hidden="true"></span>
+          </summary>
+          <div class="faq__answer">
+            {item.answer.map((para) => <p>{para}</p>)}
+            {item.list && (
+              <ul role="list">
+                {item.list.map((li) => <li>{li}</li>)}
+              </ul>
+            )}
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</Section>
+
+<style>
+  /* ---------- Layout ---------- */
+  .faq__grid { display: grid; gap: var(--space-7); }
+
+  .faq__head { display: grid; gap: var(--space-4); align-content: start; }
+  .faq__head :global(.t-h2 em) { display: inline; font-style: normal; } /* one continuous phrase — split-italic is reserved for hero / offer / final */
+  .faq__intro { max-width: 32ch; }
+  .faq__contact {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-5);
+    margin-top: var(--space-2);
+  }
+  .faq__phone {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    font-family: var(--font-display);
+    font-size: var(--size-title-sm);
+    line-height: 1;
+  }
+  .faq__phone:hover { color: var(--color-text-accent); }
+
+  @media (min-width: 64rem) {
+    .faq__grid {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+      gap: var(--col-gap);
+      align-items: start;
+    }
+    .faq__head {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-6));
+    }
+  }
+
+  /* ---------- Accordion ---------- */
+  .faq__list {
+    min-width: 0;                         /* never let long words widen the grid */
+    border-top: 1px solid var(--color-text);
+  }
+
+  .faq__item {
+    border-bottom: 1px solid var(--color-border);
+    interpolate-size: allow-keywords;
+    scroll-margin-top: calc(var(--header-height) + var(--space-5));
+  }
+
+  .faq__question {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 1.5rem;
+    align-items: start;
+    gap: var(--space-3);
+    min-height: var(--touch-target);
+    padding-block: var(--space-5);
+    cursor: pointer;
+    list-style: none;
+    border-radius: var(--radius-xs);
+  }
+  .faq__question::-webkit-details-marker { display: none; }
+  .faq__question:focus-visible { outline-offset: 4px; }
+
+  .faq__question-text {
+    font-size: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem);
+    font-weight: var(--weight-medium);
+    line-height: 1.4;
+    overflow-wrap: break-word;
+    transition: color var(--duration-fast) var(--ease-standard), transform var(--duration-base) var(--ease-out);
+  }
+  .faq__question:hover .faq__question-text { color: var(--color-text-accent); }
+
+  /* Plus → minus, drawn with two hairlines */
+  .faq__icon {
+    position: relative;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-top: 0.1rem;
+  }
+  .faq__icon::before,
+  .faq__icon::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0.875rem;
+    height: 1px;
+    background: currentColor;
+    translate: -50% -50%;
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+  .faq__icon::after { transform: rotate(90deg); }
+  .faq__item[open] .faq__icon::after { transform: rotate(0deg); }
+
+  /* Height animation — progressive enhancement (Chromium 131+); instant elsewhere */
+  .faq__item::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition:
+      block-size var(--duration-base) var(--ease-out),
+      content-visibility var(--duration-base) allow-discrete;
+  }
+  .faq__item[open]::details-content { block-size: auto; }
+
+  .faq__answer {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 58ch;
+    padding: 0 0 var(--space-6);
+    color: var(--color-text-muted);
+    line-height: var(--leading-normal);
+    overflow-wrap: anywhere;              /* long numbers/brand names never overflow on phones */
+  }
+  .faq__item[open] .faq__answer { animation: faq-in var(--duration-slow) var(--ease-out); }
+  @keyframes faq-in {
+    from { opacity: 0; transform: translateY(-0.25rem); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .faq__answer ul {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--size-small);
+  }
+  .faq__answer li {
+    position: relative;
+    padding-left: var(--space-5);
+  }
+  .faq__answer li::before {
+    content: "";
+    position: absolute;
+    left: 0.2rem;
+    top: 0.75em;
+    width: 0.5rem;
+    height: 1px;
+    background: var(--color-accent);
+  }
+
+  /* Narrow phones: drop the number column so text gets the full width */
+  @media (max-width: 23.99rem) {
+    .faq__question { grid-template-columns: minmax(0, 1fr) 1.5rem; }
+    .faq__answer { padding-left: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq__item[open] .faq__answer { animation: none; }
+  }
+</style>

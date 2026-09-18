@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/sections/Hero.astro';
+import TrustSection from '../components/sections/TrustSection.astro';
+import ServicesSection from '../components/services/ServicesSection.astro';
+import FeaturedOffer from '../components/sections/FeaturedOffer.astro';
+import AboutSection from '../components/sections/AboutSection.astro';
+import TechnologySection from '../components/sections/TechnologySection.astro';
+import JourneySection from '../components/sections/JourneySection.astro';
+import DoctorsSection from '../components/doctors/DoctorsSection.astro';
+import PricingSection from '../components/pricing/PricingSection.astro';
+import FaqSection from '../components/sections/FaqSection.astro';
+import { faq } from '../data/faq';
+import ContactSection from '../components/contact/ContactSection.astro';
+import FinalCta from '../components/sections/FinalCta.astro';
+---
+<BaseLayout
+  title="Альфа-Клиник — стоматология на Воронцовских прудах, Москва"
+  description="Стоматология Альфа-Клиник: Москва, Воронцовские пруды, д. 3. Тел.: (499) 739-51-63."
+>
+  <!-- Order follows a first-time patient's questions:
+       what is it → can I trust it → what do they treat → what does it cost (offer, prices)
+       → how does it work → who treats me → who they are → how → questions → contact -->
+  <Hero />
+  <TrustSection />
+  <ServicesSection />
+  <FeaturedOffer />
+  <PricingSection collapseOnMobile />
+  <JourneySection />
+  <DoctorsSection />
+  <AboutSection />
+  <TechnologySection />
+  <FaqSection items={faq.filter((q) => !['consultation-cost', 'cleaning', 'price-change'].includes(q.id))} />
+  <ContactSection />
+  <FinalCta />
+</BaseLayout>

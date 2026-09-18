@@ -1,0 +1,287 @@
+---
+// One promotion, three presentations:
+//   featured  — wide editorial split, price panel on the right
+//   secondary — tall card, everything visible
+//   standard  — compact list card; "what's included" and conditions fold away
+import PromoPrice from './PromoPrice.astro';
+import Button from '../ui/Button.astro';
+import { clinic } from '../../data/clinic';
+import { promoCategories, promoValidity, type Promotion } from '../../data/promotions';
+
+interface Props {
+  promo: Promotion;
+  variant?: 'featured' | 'secondary' | 'standard';
+  headingLevel?: 'h2' | 'h3';
+}
+const { promo: p, variant = 'standard', headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+const category = promoCategories.find((c) => c.id === p.category)?.label;
+const hasDetails = p.includes.length > 0 || p.conditions.length > 0;
+// standard: details always folded. featured/secondary: folded on mobile, opened on desktop by script.
+const openOnDesktop = variant !== 'standard';
+const titleId = `promo-${p.id}-${variant}`;
+---
+<article
+  class:list={['promo', `promo--${variant}`]}
+  data-promo
+  data-category={p.category}
+  aria-labelledby={titleId}
+>
+  <div class="promo__main">
+    <p class="promo__meta">
+      <span class="t-label">{category}</span>
+      {p.dated && <span class="promo__validity">{promoValidity.short}</span>}
+    </p>
+
+    <H id={titleId} class="promo__title">{p.title}</H>
+    <p class="promo__description">{p.description}</p>
+
+    {hasDetails && variant === 'featured' && (
+      <details class="promo__fold" data-open-desktop={openOnDesktop ? '' : undefined}>
+        <summary>
+          <span>Что входит и условия</span>
+          <span class="accordion__icon" aria-hidden="true"></span>
+        </summary>
+        <div class="promo__fold-body">
+          {p.includes.length > 0 && (
+            <div>
+              {openOnDesktop && <p class="t-label promo__sublabel">Что входит</p>}
+              <ul class="promo__list" role="list">{p.includes.map((i) => <li>{i}</li>)}</ul>
+            </div>
+          )}
+          {p.conditions.length > 0 && (
+            <div>
+              <p class="t-label promo__sublabel">Условия</p>
+              <ul class="promo__list promo__list--muted" role="list">{p.conditions.map((c) => <li>{c}</li>)}</ul>
+            </div>
+          )}
+        </div>
+      </details>
+    )}
+  </div>
+
+  <div class="promo__aside">
+    <PromoPrice promo={p} size={variant === 'featured' ? 'lg' : 'md'} />
+
+    {hasDetails && variant !== 'featured' && (
+      <details class="promo__fold" data-open-desktop={openOnDesktop ? '' : undefined}>
+        <summary>
+          <span>Что входит и условия</span>
+          <span class="accordion__icon" aria-hidden="true"></span>
+        </summary>
+        <div class="promo__fold-body">
+          {p.includes.length > 0 && (
+            <div>
+              {openOnDesktop && <p class="t-label promo__sublabel">Что входит</p>}
+              <ul class="promo__list" role="list">{p.includes.map((i) => <li>{i}</li>)}</ul>
+            </div>
+          )}
+          {p.conditions.length > 0 && (
+            <div>
+              {openOnDesktop && <p class="t-label promo__sublabel">Условия</p>}
+              <ul class="promo__list promo__list--muted" role="list">{p.conditions.map((c) => <li>{c}</li>)}</ul>
+            </div>
+          )}
+        </div>
+      </details>
+    )}
+
+    <div class="promo__cta">
+      <Button
+        href={clinic.phone.href}
+        variant={variant === 'standard' ? 'secondary' : 'primary'}
+        size={variant === 'standard' ? 'sm' : 'md'}
+        block="mobile"
+        arrow
+        data-book
+        aria-label={`Записаться по акции «${p.title}», позвонить ${clinic.phone.display}`}
+      >Записаться по акции</Button>
+      {variant !== 'standard' && (
+        <a class="promo__phone t-num" href={clinic.phone.href}>{clinic.phone.display}</a>
+      )}
+    </div>
+  </div>
+</article>
+
+<script>
+  // Featured/secondary cards: details open on desktop (plenty of room), folded on mobile.
+  const mq = window.matchMedia('(min-width: 64rem)');
+  const sync = () =>
+    document.querySelectorAll<HTMLDetailsElement>('details[data-open-desktop]').forEach((d) => {
+      d.open = mq.matches;
+    });
+  sync();
+  mq.addEventListener('change', sync);
+</script>
+
+<style>
+  .promo {
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+    color: var(--color-text);
+  }
+  .promo[hidden] { display: none; }
+
+  .promo__main, .promo__aside { display: grid; gap: var(--space-4); align-content: start; }
+
+  .promo__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-4);
+  }
+  .promo__meta .t-label { color: var(--color-text-accent); }
+  .promo__validity {
+    font-size: var(--size-label);
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .promo__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+    font-size: var(--size-title-sm);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .promo__description { color: var(--color-text-muted); max-width: 44ch; }
+
+  .promo__sublabel { margin-bottom: var(--space-2); }
+  .promo__fold-body > div { display: grid; }
+
+  .promo__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--size-small);
+  }
+  .promo__list li {
+    position: relative;
+    padding: var(--space-2) 0 var(--space-2) var(--space-5);
+    border-top: 1px solid var(--color-border);
+  }
+  .promo__list li::before {
+    content: "";
+    position: absolute;
+    left: 0.25rem;
+    top: 1.05em;
+    width: 0.5rem;
+    height: 1px;
+    background: var(--color-accent);
+  }
+  .promo__list--muted li { color: var(--color-text-muted); }
+
+  .promo__cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-5);
+    margin-top: var(--space-2);
+  }
+  .promo__phone {
+    font-size: var(--size-small);
+    font-weight: var(--weight-medium);
+    min-height: var(--touch-target);
+    display: inline-flex;
+    align-items: center;
+  }
+  .promo__phone:hover { color: var(--color-text-accent); }
+
+  /* ---------- Fold (standard cards) ---------- */
+  .promo__fold { border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
+  .promo__fold summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: var(--touch-target);
+    font-size: var(--size-small);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    list-style: none;
+  }
+  .promo__fold summary::-webkit-details-marker { display: none; }
+  .promo__fold[open] .accordion__icon::after { transform: rotate(0deg); }
+  .promo__fold-body { display: grid; gap: var(--space-3); padding-bottom: var(--space-4); }
+  .promo__fold-body .promo__list li:first-child { border-top: 0; }
+
+  /* Hover (pointer devices): the card answers, but nothing moves more than a few px */
+  .promo__title { transition: color var(--duration-fast) var(--ease-standard); }
+  @media (hover: hover) {
+    /* Shadow and lift move together as one response */
+    .promo--secondary, .promo--standard {
+      transition: box-shadow 180ms var(--ease-standard), transform 180ms var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+    }
+    .promo--secondary:hover, .promo--standard:hover {
+      box-shadow: var(--shadow-card-hover);
+      transform: var(--lift);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .promo--secondary:hover, .promo--standard:hover { transform: none; }
+    }
+    .promo--standard:hover .promo__title,
+    .promo--secondary:hover .promo__title { color: var(--color-text-accent); }
+    .promo--standard:hover :global(.btn__icon),
+    .promo--secondary:hover :global(.btn__icon) { transform: translateX(3px); }
+    .promo--standard:hover { border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border)); }
+  }
+
+  /* ================= Standard ================= */
+  .promo--standard {
+    padding: var(--space-5);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* ================= Secondary ================= */
+  .promo--secondary {
+    padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-card);
+  }
+  .promo--secondary .promo__aside { padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
+
+  /* ================= Featured ================= */
+  .promo--featured .promo__title { font-size: clamp(2rem, 1.4rem + 2.8vw, 4rem); line-height: 1.04; max-width: 14ch; }
+  .promo--featured .promo__description { font-size: var(--size-body-lg); }
+  .promo--featured .promo__aside {
+    padding: clamp(1.5rem, 1rem + 2vw, 3rem);
+    background: var(--color-bg-accent);
+    border-radius: var(--radius-sm);
+  }
+
+  @media (min-width: 48rem) {
+    .promo--featured .promo__fold-body { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--space-6); }
+  }
+  @media (min-width: 64rem) {
+    .promo--featured {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: var(--col-gap-tight); /* in-card text + price pairing */
+      align-items: stretch;
+    }
+    .promo--featured .promo__main { gap: var(--space-5); }
+    .promo--featured .promo__fold { margin-top: var(--space-5); border: 0; }
+    .promo--featured .promo__fold summary, .promo--secondary .promo__fold summary { display: none; }
+    .promo--secondary .promo__fold { border: 0; }
+    .promo--featured .promo__aside { align-self: start; }
+  }
+
+  /* Mobile: featured price panel goes edge-to-edge-ish and sits right after the description,
+     so price + CTA appear before the long lists */
+  @media (max-width: 63.99rem) {
+    .promo--featured { display: flex; flex-direction: column; }
+    .promo--featured .promo__main { display: contents; }
+    .promo--featured .promo__meta { order: 1; }
+    .promo--featured .promo__title { order: 2; }
+    .promo--featured .promo__description { order: 3; }
+    .promo--featured .promo__aside { order: 4; }
+    .promo--featured .promo__fold { order: 5; }
+  }
+</style>

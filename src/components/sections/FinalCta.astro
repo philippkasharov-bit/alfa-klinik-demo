@@ -1,0 +1,173 @@
+---
+// Closing conversion section. Sits directly above the footer and shares its ink
+// background, so the page ends as one continuous dark "landing".
+// Copy is factual: the free extended consultation is a published clinic offer.
+import { clinic } from '../../data/clinic';
+import Button from '../ui/Button.astro';
+
+interface Props {
+  id?: string;
+  label?: string;
+  heading?: { lead: string; accent: string };
+  text?: string;
+  ctaLabel?: string;
+}
+const {
+  id = 'final',
+  label = 'Следующий шаг',
+  heading = { lead: 'Начните', accent: 'с консультации' },
+  text = 'Врач осмотрит, проведёт диагностику и составит план лечения со сроками и стоимостью. Расширенная консультация — бесплатно по акции клиники.',
+  ctaLabel = 'Записаться на приём',
+} = Astro.props;
+---
+<section class="final" aria-labelledby={`${id}-title`}>
+  <span class="final__glow" aria-hidden="true"></span>
+
+  <div class="container container--wide final__inner">
+    <p class="final__label" data-reveal="fade">{label}</p>
+
+    <h2 id={`${id}-title`} class="final__title" data-reveal="slide">
+      {heading.lead}{' '}<em>{heading.accent}</em>
+    </h2>
+
+    <div class="final__row">
+      <p class="final__text" data-reveal="slide" style="--reveal-delay: 1">{text}</p>
+
+      <div class="final__action" data-reveal="slide" style="--reveal-delay: 2">
+        <a class="final__phone t-num" href={clinic.phone.href}>{clinic.phone.display}</a>
+        <Button href={clinic.phone.href} arrow block="mobile" data-book aria-label={`${ctaLabel}: ${clinic.phone.display}`}>{ctaLabel}</Button>
+      </div>
+    </div>
+
+    <dl class="final__facts" data-reveal="fade" style="--reveal-delay: 3">
+      <div>
+        <dt>Время работы</dt>
+        <dd class="t-num">{clinic.hours[0].time}<span> · воскресенье — выходной</span></dd>
+      </div>
+      <div>
+        <dt>Адрес</dt>
+        <dd>{clinic.addressShort}<span> · {clinic.entrance.charAt(0).toLowerCase() + clinic.entrance.slice(1)}</span></dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<style>
+  .final {
+    --fg: var(--color-text-inverse);
+    --muted: color-mix(in srgb, var(--color-text-inverse) 68%, transparent);
+    --line: var(--color-border-inverse);
+
+    position: relative;
+    overflow: hidden;
+    padding-block: var(--section-lg) var(--section-md);
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--color-bg-inverse) 96%, var(--color-text-inverse)) 0%,
+      var(--color-bg-inverse) 100%);
+    color: var(--fg);
+    isolation: isolate;
+  }
+  .final :global(:focus-visible) { outline-color: var(--fg); }
+
+  /* Soft sage light from the top — the only "effect", built from brand tokens */
+  .final__glow {
+    position: absolute;
+    z-index: -1;
+    left: 50%;
+    top: -40%;
+    width: min(120rem, 180vw);
+    aspect-ratio: 2 / 1;
+    translate: -50% 0;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 42%, transparent), transparent);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  .final__inner { display: grid; }
+
+  .final__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--size-label);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.01em;
+    color: var(--muted);
+  }
+  .final__label::before { content: ""; width: 2rem; height: 1px; background: currentColor; }
+
+  .final__title {
+    margin: var(--space-5) 0 0;
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+    font-size: clamp(3rem, 1.4rem + 7.2vw, 8.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  .final__title em { display: block; font-style: italic; color: var(--color-bg-accent); }
+
+  .final__row {
+    display: grid;
+    gap: var(--space-7);
+    margin-top: var(--space-8);
+    padding-top: var(--space-7);
+    border-top: 1px solid var(--line);
+  }
+  .final__text {
+    max-width: 42ch;
+    font-size: var(--size-body-lg);
+    line-height: var(--leading-relaxed);
+    color: var(--muted);
+  }
+
+  /* Large phone number + the standard primary button */
+  .final__action { display: grid; gap: var(--space-4); justify-items: start; }
+  .final__action :global(.btn) { white-space: normal; text-align: center; line-height: 1.25; padding-block: var(--space-3); }
+  .final__phone {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.75rem);
+    font-weight: var(--weight-medium);
+    line-height: 1.05;
+    white-space: nowrap;
+    transition: color var(--duration-fast) var(--ease-standard);
+  }
+  .final__phone:hover { color: var(--color-bg-accent); }
+
+  .final__facts {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-8) 0 0;
+    font-size: var(--size-small);
+  }
+  .final__facts div { display: grid; gap: var(--space-1); }
+  .final__facts dt {
+    font-size: var(--size-label);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.01em;
+    color: var(--muted);
+  }
+  .final__facts dd { margin: 0; overflow-wrap: anywhere; }
+  .final__facts dd span { color: var(--muted); }
+
+  @media (min-width: 40rem) {
+    .final__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--grid-gap); }
+  }
+
+  @media (min-width: 64rem) {
+    .final__row {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+      align-items: center;
+      gap: var(--col-gap);
+    }
+    .final__action { justify-self: end; justify-items: end; }
+  }
+
+  /* Narrow phones */
+  @media (max-width: 23.99rem) {
+    .final__phone { font-size: 1.5rem; }
+  }
+</style>

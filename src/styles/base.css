@@ -1,0 +1,166 @@
+/* Reset, document defaults, typography roles, links, focus. */
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-height) + var(--space-4));
+}
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+body {
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--size-body);
+  line-height: var(--leading-normal);
+  font-weight: var(--weight-regular);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern", "liga";
+}
+
+img, picture, video, svg { display: block; max-width: 100%; height: auto; }
+input, button, textarea, select { font: inherit; color: inherit; }
+p, h1, h2, h3, h4 { overflow-wrap: break-word; }
+h1, h2, h3, h4 { text-wrap: balance; }
+p { text-wrap: pretty; }
+::selection { background: var(--color-accent-soft-hover); color: var(--color-text); }
+
+/* ---------------------------------------------------------------------------
+   Typography roles — use classes so semantics (h1..h6) stay independent of look
+   --------------------------------------------------------------------------- */
+.t-display, .t-h1, .t-h2 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+}
+.t-display { font-size: var(--size-display); line-height: var(--leading-tight); letter-spacing: var(--tracking-display); }
+.t-h1      { font-size: var(--size-h1);      line-height: var(--leading-tight); letter-spacing: var(--tracking-display); }
+.t-h2      { font-size: var(--size-h2);      line-height: var(--leading-snug);  letter-spacing: var(--tracking-heading); }
+/* Serif italic accent inside headings: <em> */
+.t-display em, .t-h1 em, .t-h2 em { font-style: italic; }
+.t-display em { color: var(--color-text-accent); }
+
+.t-h3 {
+  font-family: var(--font-sans);
+  font-size: var(--size-h3);
+  line-height: 1.3;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-heading);
+}
+.t-body-lg { font-size: var(--size-body-lg); line-height: var(--leading-relaxed); max-width: var(--measure); }
+.t-body    { font-size: var(--size-body);    line-height: var(--leading-normal); max-width: var(--measure); }
+.t-small   { font-size: var(--size-small);   line-height: 1.55; }
+.t-muted   { color: var(--color-text-muted); }
+
+.t-label {
+  font-family: var(--font-sans);
+  font-size: var(--size-label);
+  font-weight: var(--weight-medium);
+  line-height: 1.4;
+  letter-spacing: var(--tracking-label);
+  color: var(--color-text-muted);
+}
+
+/* Section kicker: the label that opens a section head gets a short rule —
+   the same device used in the featured offer and the closing CTA. */
+:is(.hero__main, .trust__head, .services__head, .about__content, .tech__head,
+    .journey__head-main, .doctors__head-main, .pricing__head-main, .faq__head,
+    .contact__head, .promos-intro__head, .price-intro__head, .price-notes__head,
+    .promo-conditions__head, .promos-block-head) > .t-label:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text);
+}
+:is(.hero__main, .trust__head, .services__head, .about__content, .tech__head,
+    .journey__head-main, .doctors__head-main, .pricing__head-main, .faq__head,
+    .contact__head, .promos-intro__head, .price-intro__head, .price-notes__head,
+    .promo-conditions__head, .promos-block-head) > .t-label:first-child::before {
+  content: "";
+  width: 1.75rem;
+  height: 1px;
+  background: var(--color-accent);
+}
+.t-nav {
+  font-size: var(--size-nav);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.005em;
+}
+/* Prices / numbers: tabular so columns align */
+.t-num { font-variant-numeric: tabular-nums lining-nums; }
+
+/* ---------------------------------------------------------------------------
+   Links
+   --------------------------------------------------------------------------- */
+a { color: inherit; text-decoration: none; }
+
+/* In-copy link: thin underline that thickens on hover */
+.link,
+.prose a {
+  color: var(--color-text-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  transition: text-decoration-color var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard);
+}
+.link:hover,
+.prose a:hover { color: var(--color-accent-active); text-decoration-color: currentColor; }
+
+/* Navigation link: no underline at rest, drawn line on hover / current */
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  color: var(--color-text);
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0.6rem;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--duration-base) var(--ease-out);
+}
+.nav-link:hover::after,
+.nav-link[aria-current="page"]::after { transform: scaleX(1); transform-origin: left; }
+
+/* ---------------------------------------------------------------------------
+   Focus — visible for keyboard, silent for mouse
+   --------------------------------------------------------------------------- */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: var(--radius-xs);
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-4); top: var(--space-4);
+  z-index: var(--z-overlay);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  transform: translateY(-200%);
+}
+.skip-link:focus-visible { transform: none; }
+main:focus { outline: none; }   /* programmatic focus target of the skip link — no visible ring on the whole page */
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

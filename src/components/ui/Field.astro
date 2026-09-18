@@ -1,0 +1,30 @@
+---
+interface Props {
+  id: string;
+  label: string;
+  type?: 'text' | 'tel' | 'email' | 'textarea' | 'select';
+  hint?: string;
+  error?: string;
+  required?: boolean;
+  placeholder?: string;
+  autocomplete?: string;
+  options?: string[];
+}
+const { id, label, type = 'text', hint, error, required, placeholder, autocomplete, options = [] } = Astro.props;
+const describedBy = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined;
+const common = { id, name: id, required, 'aria-invalid': error ? 'true' : undefined, 'aria-describedby': describedBy };
+---
+<div class="field">
+  <label class="field__label" for={id}>{label}{required && <span aria-hidden="true"> *</span>}</label>
+  {type === 'textarea' ? (
+    <textarea class="textarea" placeholder={placeholder} {...common}></textarea>
+  ) : type === 'select' ? (
+    <select class="select" {...common}>
+      {options.map((o) => <option>{o}</option>)}
+    </select>
+  ) : (
+    <input class="input" type={type} placeholder={placeholder} autocomplete={autocomplete} {...common} />
+  )}
+  {hint && <p class="field__hint" id={`${id}-hint`}>{hint}</p>}
+  {error && <p class="field__error" id={`${id}-error`}>{error}</p>}
+</div>

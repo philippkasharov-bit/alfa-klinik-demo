@@ -1,0 +1,147 @@
+---
+import type { PriceRow } from '../../data/pricing';
+import { formatRub as rub } from '../../utils/format';
+
+interface Props { row: PriceRow; }
+const { row } = Astro.props;
+---
+<li class:list={['price-row', row.placeholder && 'price-row--placeholder']}>
+  <div class="price-row__main">
+    <p class="price-row__name">{row.name}</p>
+    {row.detail && <p class="price-row__detail">{row.detail}</p>}
+    {row.condition && <p class="price-row__condition">{row.condition}</p>}
+    {row.includes && row.includes.length > 0 && (
+      <details class="price-row__more">
+        <summary>Что входит в цену</summary>
+        <ul role="list">{row.includes.map((i) => <li>{i}</li>)}</ul>
+      </details>
+    )}
+  </div>
+  <p class="price-row__price t-num">
+    {row.was != null && (
+      <s class="price-row__was"><span class="visually-hidden">Цена до скидки: </span>{rub(row.was)}</s>
+    )}
+    {row.was != null && <span class="visually-hidden">Цена со скидкой: </span>}
+    {row.price != null ? rub(row.price) : row.priceText}
+  </p>
+</li>
+
+<style>
+  .price-row__was {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-family: var(--font-sans);
+    font-size: var(--size-small);
+    font-weight: var(--weight-regular, 400);
+    color: var(--color-text-muted);
+    text-decoration-thickness: 1px;
+  }
+  .price-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-5);
+    padding-block: var(--space-4);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent);
+  }
+
+  .price-row__main { display: grid; gap: 0.2rem; min-width: 0; }
+  .price-row__name {
+    overflow-wrap: break-word;
+    hyphens: auto;
+    font-size: var(--size-body);
+    font-weight: var(--weight-medium);
+    line-height: 1.35;
+  }
+  .price-row__detail {
+    max-width: 62ch;
+    overflow-wrap: break-word;
+    font-size: var(--size-small);
+    color: var(--color-text-muted);
+    line-height: 1.45;
+  }
+  .price-row__condition {
+    overflow-wrap: break-word;
+    justify-self: start;
+    margin-top: 0.3rem;
+    font-size: var(--size-label);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.01em;
+    line-height: 1.4;
+    color: var(--color-text-accent);
+  }
+
+  .price-row__price {
+    font-family: var(--font-display);
+    font-size: var(--size-title-sm);
+    font-weight: var(--weight-medium);
+    line-height: 1;
+    white-space: nowrap;
+    text-align: right;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  /* Expandable «Что входит» */
+  .price-row__more { justify-self: start; margin-top: var(--space-1); interpolate-size: allow-keywords; }
+  .price-row__more summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--touch-target);
+    font-size: var(--size-small);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    list-style: none;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    text-decoration-color: var(--color-border-strong);
+  }
+  .price-row__more summary::-webkit-details-marker { display: none; }
+  .price-row__more summary::after {
+    content: "";
+    width: 0.4rem;
+    height: 0.4rem;
+    border-right: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    transform: translateY(-0.15rem) rotate(45deg);
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+  .price-row__more[open] summary::after { transform: translateY(0.1rem) rotate(-135deg); }
+  .price-row__more summary:hover { color: var(--color-text-accent); text-decoration-color: currentColor; }
+  .price-row__more::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition: block-size var(--duration-base) var(--ease-out), content-visibility var(--duration-base) allow-discrete;
+  }
+  .price-row__more[open]::details-content { block-size: auto; }
+  .price-row__more ul {
+    display: grid;
+    gap: 0.2rem;
+    margin: 0;
+    padding: 0 0 var(--space-2);
+    list-style: none;
+    font-size: var(--size-small);
+    color: var(--color-text-muted);
+  }
+  .price-row__more li { position: relative; padding-left: var(--space-4); }
+  .price-row__more li::before { content: ""; position: absolute; left: 0.1rem; top: 0.75em; width: 0.45rem; height: 1px; background: var(--color-accent); }
+
+  /* Placeholder rows: unmistakably not real data */
+  .price-row--placeholder .price-row__name,
+  .price-row--placeholder .price-row__detail {
+    justify-self: start;
+    padding-inline: 0.2em;
+    border-radius: var(--radius-xs);
+    color: var(--color-text-muted);
+    background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--color-border) 70%, transparent) 6px 7px);
+  }
+  .price-row--placeholder .price-row__price { color: var(--color-text-muted); }
+
+  /* Narrow phones: price drops under the name, still right-aligned and large */
+  @media (max-width: 23.99rem) {
+    .price-row { grid-template-columns: 1fr; }
+    .price-row__price { justify-self: end; }
+  }
+</style>

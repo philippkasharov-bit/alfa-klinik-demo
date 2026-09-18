@@ -1,0 +1,117 @@
+/* =========================================================================
+   Motion system
+   Principles: few moving things, short distances, one easing family,
+   transform/opacity/clip-path only (compositor-friendly), always optional.
+
+   Elements start VISIBLE. The hidden initial state applies only once
+   <html> has .js-motion (set inline in BaseLayout), and a failsafe removes
+   that class if the reveal script never runs.
+   ========================================================================= */
+
+/* ---------- Reveal: fade / slide ---------- */
+.js-motion [data-reveal] {
+  transition:
+    opacity   var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+  transition-delay: calc(var(--reveal-delay, 0) * 70ms);
+}
+.js-motion [data-reveal="fade"]:not(.is-visible) { opacity: 0; }
+.js-motion [data-reveal="slide"]:not(.is-visible) {
+  opacity: 0;
+  transform: translate3d(0, var(--distance-slide), 0);
+}
+
+/* ---------- Reveal: image ----------
+   A clip wipes upward while the content inside settles from a slight scale.
+   Works for real <img> and for placeholder frames (first child). */
+.js-motion [data-reveal="image"] {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path var(--duration-reveal) var(--ease-in-out);
+  transition-delay: calc(var(--reveal-delay, 0) * 70ms);
+}
+.js-motion [data-reveal="image"] > :first-child,
+.js-motion [data-reveal="image"] img {
+  transition: transform calc(var(--duration-reveal) * 1.4) var(--ease-out);
+}
+.js-motion [data-reveal="image"]:not(.is-visible) { clip-path: inset(100% 0 0 0); }
+.js-motion [data-reveal="image"]:not(.is-visible) > :first-child,
+.js-motion [data-reveal="image"]:not(.is-visible) img { transform: scale(var(--scale-settle)); }
+
+/* ---------- Hover: image zoom inside a frame (pointer devices only) ---------- */
+.hover-zoom img { transition: transform var(--duration-reveal) var(--ease-out); }
+@media (hover: hover) {
+  .hover-zoom:hover img { transform: scale(1.02); }
+}
+
+/* ---------- Press feedback: every button-like control ---------- */
+.btn { transition-property: background-color, border-color, color, transform; }
+.btn:active:not([disabled]):not([aria-disabled="true"]) {
+  transform: scale(0.985);
+  transition-duration: var(--duration-instant);
+}
+
+/* ---------- Entering items (e.g. filtered promotions) ---------- */
+@keyframes motion-enter {
+  from { opacity: 0; transform: translate3d(0, 0.5rem, 0); }
+  to   { opacity: 1; transform: none; }
+}
+.is-entering {
+  animation: motion-enter var(--duration-slow) var(--ease-out) both;
+  animation-delay: calc(var(--enter-index, 0) * 50ms);
+}
+
+/* ---------- Page transitions (cross-document View Transitions) ----------
+   Progressive: supporting browsers crossfade between pages; the header is
+   named so it stays put instead of flashing. Others navigate normally. */
+@view-transition { navigation: auto; }
+.site-header { view-transition-name: site-header; }
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-base);
+  animation-timing-function: var(--ease-standard);
+}
+::view-transition-new(root) { animation-name: page-in; }
+@keyframes page-in {
+  from { opacity: 0; transform: translate3d(0, 0.375rem, 0); }
+}
+
+/* ---------- Reduced motion: everything visible, nothing travels ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .js-motion [data-reveal] { opacity: 1 !important; transform: none !important; clip-path: none !important; transition: none !important; }
+  .js-motion [data-reveal] > :first-child,
+  .js-motion [data-reveal] img { transform: none !important; }
+  .is-entering { animation: none; }
+  .btn:active { transform: none; }
+  @view-transition { navigation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Secondary disclosures: same open/close motion as the FAQ ----------
+   (promotion details, "all departments", mobile-menu services). Progressive:
+   Chromium animates height; other browsers open instantly. */
+.promo__fold,
+.about__departments,
+.mobile-menu__services { interpolate-size: allow-keywords; }
+.promo__fold::details-content,
+.about__departments::details-content,
+.mobile-menu__services::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition:
+    block-size var(--duration-base) var(--ease-out),
+    content-visibility var(--duration-base) allow-discrete;
+}
+.promo__fold[open]::details-content,
+.about__departments[open]::details-content,
+.mobile-menu__services[open]::details-content { block-size: auto; }
+
+/* Featured/secondary promotion details: collapsed in the HTML (mobile-first, no shift on
+   phones). On desktop the content is shown by CSS at first paint where ::details-content is
+   supported; the card script also sets [open] for other browsers and assistive tech. */
+@media (min-width: 64rem) {
+  details[data-open-desktop]::details-content { block-size: auto; content-visibility: visible; }
+}

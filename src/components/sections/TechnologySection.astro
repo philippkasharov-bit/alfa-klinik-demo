@@ -1,0 +1,354 @@
+---
+// Technology / modern dentistry. Editorial split:
+//   desktop — sticky "instrument" image on the left that follows the chapter in view
+//   mobile  — image, heading, chapters stacked (no scroll-linked behaviour)
+import Section from '../layout/Section.astro';
+import { technology } from '../../data/technology';
+
+const { chapters } = technology;
+---
+<Section width="wide" tone="accent" labelledby="tech-title" class="tech">
+  <div class="tech__grid" data-tech>
+    <!-- Visual -->
+    <div class="tech__visual">
+      <div class="tech__frame" data-reveal="image">
+        <div class="tech__placeholder" role="img" aria-label="Заглушка: фотография оборудования клиники">
+          <span class="tech__corners" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+
+          <span class="tech__readout" aria-hidden="true">
+            <span class="tech__readout-num t-num" data-tech-num>01</span>
+            <span class="tech__readout-label" data-tech-label>{chapters[0].imageLabel}</span>
+          </span>
+
+          <span class="tech__placeholder-text">
+            <span class="t-label">Заглушка · фото оборудования</span>
+            <span class="tech__placeholder-title">Оборудование клиники</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Text -->
+    <div class="tech__content">
+      <header class="tech__head">
+        <p class="t-label" data-reveal="fade">{technology.eyebrow}</p>
+        <h2 id="tech-title" class="t-h2 tech__title" data-reveal="slide">
+          {technology.heading.lead}{' '}<em>{technology.heading.accent}</em>
+        </h2>
+        <p class="t-body-lg tech__intro" data-reveal="slide" style="--reveal-delay: 1">{technology.intro}</p>
+      </header>
+
+      <ol class="tech__chapters" role="list">
+        {chapters.map((c, i) => (
+          <li
+            class="tech__chapter"
+            data-tech-chapter
+            data-num={String(i + 1).padStart(2, '0')}
+            data-label={c.imageLabel}
+            data-reveal="slide"
+          >
+            <span class="tech__chapter-ghost" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <span class="tech__chapter-num t-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <div class="tech__chapter-body">
+              <h3 class="tech__chapter-title">{c.title}</h3>
+              <p class="tech__chapter-text">{c.text}</p>
+              <ul class="tech__details" role="list">
+                {c.details.map((d) => <li>{d}</li>)}
+              </ul>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</Section>
+
+<script>
+  // Desktop only: highlight the chapter nearest the viewport centre and
+  // mirror its number/label into the image readout.
+  const DESKTOP = window.matchMedia('(min-width: 64rem)');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<HTMLElement>('[data-tech]').forEach((root) => {
+    const chapters = [...root.querySelectorAll<HTMLElement>('[data-tech-chapter]')];
+    const num = root.querySelector<HTMLElement>('[data-tech-num]');
+    const label = root.querySelector<HTMLElement>('[data-tech-label]');
+    if (!chapters.length || !num || !label) return;
+
+    // Readout swap always resolves to the latest target, even during fast scrolling.
+    let target: HTMLElement = chapters[0];
+    let timer = 0;
+    const swap = () => {
+      timer = 0;
+      num.textContent = target.dataset.num ?? '';
+      label.textContent = target.dataset.label ?? '';
+      root.classList.remove('is-swapping');
+    };
+    const activate = (el: HTMLElement) => {
+      chapters.forEach((c) => c.classList.toggle('is-current', c === el));
+      target = el;
+      if (num.textContent === el.dataset.num && !timer) return;
+      if (reduced.matches) return swap();
+      root.classList.add('is-swapping');
+      if (!timer) timer = window.setTimeout(swap, 180);
+    };
+
+    // Pick the chapter whose centre is closest to the viewport centre (rAF-throttled).
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      if (!DESKTOP.matches) return;
+      const mid = window.innerHeight / 2;
+      let best = chapters[0];
+      let bestDist = Infinity;
+      for (const c of chapters) {
+        const r = c.getBoundingClientRect();
+        const d = Math.abs(r.top + r.height / 2 - mid);
+        if (d < bestDist) { bestDist = d; best = c; }
+      }
+      activate(best);
+    };
+    const onScroll = () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+
+    const sync = () => {
+      root.classList.toggle('is-linked', DESKTOP.matches);
+      if (DESKTOP.matches) update();
+      else chapters.forEach((c) => c.classList.remove('is-current'));
+    };
+    sync();
+    DESKTOP.addEventListener('change', sync);
+  });
+</script>
+
+<style>
+  /* ---------- Mobile first ---------- */
+  .tech__grid { display: grid; gap: var(--space-7); }
+
+  .tech__frame {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--color-border-strong);
+  }
+
+  /* Same light placeholder treatment as the hero and services images */
+  .tech__placeholder {
+    --line-strong: color-mix(in srgb, var(--color-accent) 40%, transparent);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-items: end;
+    padding: var(--space-5);
+    background: linear-gradient(160deg, var(--color-bg) 0%, var(--color-bg-subtle) 100%);
+    color: var(--color-text);
+  }
+
+  .tech__corners i {
+    position: absolute;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-color: var(--line-strong);
+    border-style: solid;
+    border-width: 0;
+  }
+  .tech__corners i:nth-child(1) { top: 1rem; left: 1rem; border-top-width: 1px; border-left-width: 1px; }
+  .tech__corners i:nth-child(2) { top: 1rem; right: 1rem; border-top-width: 1px; border-right-width: 1px; }
+  .tech__corners i:nth-child(3) { bottom: 1rem; left: 1rem; border-bottom-width: 1px; border-left-width: 1px; }
+  .tech__corners i:nth-child(4) { bottom: 1rem; right: 1rem; border-bottom-width: 1px; border-right-width: 1px; }
+
+
+  .tech__readout {
+    position: absolute;
+    left: 10%;
+    top: 12%;
+    display: grid;
+    gap: var(--space-2);
+    transition: opacity var(--duration-fast) var(--ease-standard), transform var(--duration-base) var(--ease-out);
+  }
+  .is-swapping .tech__readout { opacity: 0; transform: translateY(0.5rem); }
+  .tech__readout-num {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 2rem + 6vw, 8rem);
+    line-height: 0.9;
+    font-style: italic;
+    color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+  }
+  .tech__readout-label {
+    font-size: var(--size-label);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.01em;
+    color: var(--color-text-accent);
+  }
+  /* Mobile has no scroll linking: show a neutral label instead of a chapter */
+  .tech__grid:not(.is-linked) .tech__readout { display: none; }
+
+  .tech__placeholder-text {
+    position: relative;
+    display: grid;
+    gap: var(--space-2);
+    max-width: 26rem;
+    padding-top: var(--space-4);
+    border-top: 1px dashed var(--color-border-strong);
+    color: var(--color-text-muted);
+  }
+  .tech__placeholder-title {
+    font-family: var(--font-display);
+    font-size: var(--size-h3);
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  .tech__head { display: grid; gap: var(--space-4); }
+  /* Chapter-opening headline: same enlarged scale as the hero and services */
+  .tech__title {
+    font-size: var(--size-title);
+    line-height: 1.06;
+    letter-spacing: -0.015em;
+  }
+  .tech__title em { display: inline; font-style: normal; } /* one continuous phrase — split-italic is reserved for hero / offer / final */
+  .tech__intro { max-width: 44ch; color: var(--color-text-muted); }
+
+  .tech__chapters {
+    display: grid;
+    margin: var(--space-8) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-text);
+  }
+  .tech__chapter {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    gap: var(--space-3);
+    padding-block: var(--space-6);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
+  }
+  /* Ghost numeral — same values as .service__visual-num (desktop only, like Services) */
+  .tech__chapter-ghost { display: none; }
+  /* Alternating segments: odd rows keep the section's light accent, even rows take the secondary surface */
+  .tech__chapter { padding-inline: var(--space-4); }
+  .tech__chapter:nth-child(even) {
+    background: var(--color-bg-subtle);
+    border-radius: var(--radius-sm);
+    border-bottom-color: transparent;
+  }
+  .tech__chapter:has(+ .tech__chapter:nth-child(even)) { border-bottom-color: transparent; }
+  .tech__chapter-num {
+    padding-top: 0.45rem;
+    font-size: var(--size-label);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-accent);
+  }
+  .tech__chapter-body { display: grid; gap: var(--space-3); }
+  .tech__chapter-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+    font-size: var(--size-title-sm);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .tech__chapter-text { max-width: 46ch; color: var(--color-text-muted); }
+
+  .tech__details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: var(--space-1) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tech__details li {
+    padding: 0.3rem 0.75rem;              /* 2.5:1 horizontal:vertical */
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);      /* same radius as cards */
+    font-size: var(--size-label);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  @media (max-width: 63.99rem) {
+    .tech__frame { aspect-ratio: 16 / 9; }
+    .tech__chapters { margin-top: var(--space-6); }
+    .tech__chapter { padding-block: var(--space-5); grid-template-columns: 2rem minmax(0, 1fr); }
+    .tech__chapter-title { font-size: var(--size-title-sm); }
+    .tech__chapter-text { font-size: var(--size-small); }
+    .tech__chapter-body { gap: var(--space-2); }
+    .tech__details { gap: 0; margin: 0; }
+    .tech__details li {
+      padding: 0;
+      border: 0;
+      font-size: var(--size-label);
+      color: var(--color-text-accent);
+    }
+    .tech__details li:not(:last-child)::after { content: "·"; margin-inline: 0.45em; color: var(--color-text-muted); }
+  }
+
+  /* ---------- Desktop: sticky instrument left, chapters right ---------- */
+  @media (min-width: 64rem) {
+    .tech__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: var(--col-gap);
+      align-items: start;
+    }
+    .tech__visual {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-6));
+    }
+    /* z-index only — position stays sticky (set above), or the panel stops following the scroll */
+    .tech__visual { z-index: 1; }
+    .tech__frame {
+      /* Layering: the panel crosses the grid line into the column gap */
+      width: calc(100% + var(--space-6));
+      box-shadow: var(--shadow-card);
+      aspect-ratio: auto;
+      height: min(calc(100svh - var(--header-height) - var(--space-6) * 2), 40rem);
+      min-height: 26rem;
+    }
+    .tech__placeholder { padding: var(--space-7); }
+
+    .tech__chapters { margin-top: var(--space-9); }
+    .tech__chapter { position: relative; padding-block: var(--space-7); overflow: hidden; isolation: isolate; }
+    /* One index per chapter: the ghost numeral carries it on desktop */
+    .tech__chapter { grid-template-columns: minmax(0, 1fr); }
+    .tech__chapter-num { display: none; }
+    .tech__chapter-ghost {
+      display: block;
+      position: absolute;
+      z-index: -1;
+      top: -0.12em;
+      right: var(--space-5);
+      font-family: var(--font-display);
+      font-size: clamp(8rem, 4rem + 8vw, 13rem);
+      line-height: 1;
+      font-style: italic;
+      color: color-mix(in srgb, var(--color-accent) 22%, transparent);
+      pointer-events: none;
+      transform: translateY(0.75rem) scale(1.04);
+      transition: transform var(--duration-reveal) var(--ease-out);
+    }
+    .tech__grid:not(.is-linked) .tech__chapter-ghost,
+    .tech__chapter.is-current .tech__chapter-ghost { transform: none; }
+
+    /* Scroll-linked emphasis: quiet by default, current chapter at full strength */
+    /* Current chapter is emphasised by title colour, index colour and a small shift.
+       Nothing is faded with opacity, so every chapter stays readable (WCAG 1.4.3). */
+    .tech__grid.is-linked .tech__chapter-body {
+      transition: transform var(--duration-slow) var(--ease-out);
+    }
+    .tech__grid.is-linked .tech__chapter-title {
+      color: color-mix(in srgb, var(--color-text) 62%, var(--color-bg-accent));
+      transition: color var(--duration-base) var(--ease-standard);
+    }
+    .tech__grid.is-linked .tech__chapter.is-current .tech__chapter-title { color: var(--color-text); }
+    .tech__grid.is-linked .tech__chapter.is-current .tech__chapter-body { transform: translateX(0.5rem); }
+    .tech__grid.is-linked .tech__chapter-num { transition: color var(--duration-base) var(--ease-standard); color: var(--color-text-muted); }
+    .tech__grid.is-linked .tech__chapter.is-current .tech__chapter-num { color: var(--color-text-accent); }
+  }
+</style>

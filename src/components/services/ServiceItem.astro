@@ -1,0 +1,78 @@
+---
+// One service: a trigger row + a detail panel.
+// Desktop: panel is shown beside the list for the active item.
+// Mobile: panel expands under its row (accordion).
+// Without JS every panel is simply visible under its row.
+import type { Service } from '../../data/services';
+import { clinic } from '../../data/clinic';
+
+interface Props {
+  service: Service;
+  index: number;
+}
+const { service: s, index } = Astro.props;
+const id = `service-${s.slug}`;
+const num = String(index + 1).padStart(2, '0');
+---
+<li
+  class="service"
+  id={`service-${s.slug}`}
+  data-service
+  data-reveal="slide"
+  style={`--reveal-delay: ${Math.min(index, 5)}`}
+>
+  <h3 class="service__heading">
+    <button
+      class="service__trigger"
+      type="button"
+      id={`${id}-trigger`}
+      aria-expanded="true"
+      aria-controls={`${id}-panel`}
+      data-service-trigger
+    >
+      <span class="service__num t-num" aria-hidden="true">{num}</span>
+      <span class="service__titles">
+        <span class="service__name">{s.name}</span>
+        <span class="service__summary">{s.summary}</span>
+      </span>
+      <span class="service__icon" aria-hidden="true">
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="none">
+          <path d="M1 8h13M9 3l5 5-5 5" stroke="currentColor" stroke-width="1.3" />
+        </svg>
+      </span>
+    </button>
+  </h3>
+
+  <div class="service__panel" id={`${id}-panel`} role="region" aria-labelledby={`${id}-trigger`} data-service-panel>
+    <div class="service__panel-inner">
+      <div class="service__visual" role="img" aria-label={`Заглушка: ${s.imageLabel}`}>
+        <span class="service__visual-num" aria-hidden="true">{num}</span>
+        <span class="t-label">Заглушка · {s.imageLabel}</span>
+      </div>
+
+      <div class="service__body">
+        <p class="service__description">{s.description}</p>
+
+        <ul class="service__includes" role="list">
+          {s.includes.map((item) => <li>{item}</li>)}
+        </ul>
+
+        {s.offer && <p class="tag tag--accent service__offer">{s.offer}</p>}
+
+        <div class="service__actions">
+          <a class="btn btn--secondary btn--sm service__link" href={clinic.phone.href} aria-label={`Записаться: ${s.name.toLowerCase()}, телефон ${clinic.phone.display}`}>
+            Записаться<span class="service__sep"> · </span><span class="t-num">{clinic.phone.display}</span>
+          </a>
+          {s.priceHref && (
+            <a class="btn btn--text service__link" href={s.priceHref}>
+              Цены раздела
+              <svg class="btn__icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M1 8h13M9 3l5 5-5 5" stroke="currentColor" stroke-width="1.3" />
+              </svg>
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+</li>

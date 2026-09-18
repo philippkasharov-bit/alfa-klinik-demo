@@ -1,0 +1,43 @@
+---
+import '../styles/global.css';
+import serifCyr from '@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-500-normal.woff2?url';
+import sansCyr from '@fontsource/manrope/files/manrope-cyrillic-400-normal.woff2?url';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import MobileCallBar from '../components/layout/MobileCallBar.astro';
+interface Props { title: string; description?: string; header?: boolean; footer?: boolean; noindex?: boolean; }
+const { title, description = '', header = true, footer = true, noindex = false } = Astro.props;
+---
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#F7F6F2" />
+    <!-- Preload the two faces visible above the fold (hero headline + body text). -->
+    <link rel="preload" href={serifCyr} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={sansCyr} as="font" type="font/woff2" crossorigin />
+    <script is:inline>
+      document.documentElement.classList.add('js-motion');
+      // Failsafe: if the reveal module never runs (blocked/failed), show all content.
+      setTimeout(function () { if (!window.__revealReady) document.documentElement.classList.remove('js-motion'); }, 2500);
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Перейти к содержимому</a>
+    {header && <Header />}
+    <main id="main" tabindex="-1"><slot /></main>
+    <slot name="before-footer" />
+    {footer && <Footer />}
+    <MobileCallBar />
+    <script>
+      import { initReveal } from '../scripts/reveal';
+      import { initBooking } from '../scripts/booking';
+      initReveal();
+      initBooking();
+    </script>
+  </body>
+</html>

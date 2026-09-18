@@ -1,0 +1,255 @@
+---
+// Doctor profile card.
+//   featured — large editorial split (photo + full profile)
+//   compact  — portrait card for the supporting row
+// Pass `doctor` for a real profile, or only `department` for a labelled placeholder.
+import { departments, type Doctor, type DepartmentId } from '../../data/doctors';
+
+interface Props {
+  doctor?: Doctor;
+  department: DepartmentId;
+  variant?: 'featured' | 'compact';
+  headingLevel?: 'h3' | 'h4';
+}
+const { doctor, department, variant = 'compact', headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+const isPlaceholder = !doctor;
+const deptName = departments[department];
+const titleId = `doctor-${doctor?.slug ?? `placeholder-${department}`}-${variant}`;
+---
+<article
+  class:list={['doctor', `doctor--${variant}`, isPlaceholder && 'doctor--placeholder']}
+  aria-labelledby={titleId}
+>
+  <div class="doctor__photo">
+    {doctor?.photo ? (
+      <img
+        src={doctor.photo.src}
+        alt={doctor.photo.alt}
+        width={doctor.photo.width}
+        height={doctor.photo.height}
+        loading="lazy"
+        decoding="async"
+      />
+    ) : (
+      <div class="doctor__photo-placeholder" role="img" aria-label="Фото врача появится после согласования">
+        <span class="doctor__photo-frame" aria-hidden="true"></span>
+        <span class="doctor__photo-tag">Фото появится после согласования</span>
+      </div>
+    )}
+  </div>
+
+  <div class="doctor__info">
+    <p class="doctor__dept">{deptName}</p>
+
+    <H id={titleId} class="doctor__name">
+      {doctor ? doctor.name : <span class="doctor__ph">Имя и фамилия врача</span>}
+    </H>
+
+    <p class="doctor__specialty">
+      {doctor ? doctor.specialty : <span class="doctor__ph">Специальность — уточнить у клиники</span>}
+    </p>
+
+    {variant === 'featured' && (
+      <>
+        <p class="doctor__bio">
+          {doctor?.bio ?? (
+            <span class="doctor__ph">
+              Короткая биография: подход к лечению, направления работы. Текст предоставляет клиника.
+            </span>
+          )}
+        </p>
+
+        <dl class="doctor__facts">
+          <div>
+            <dt>Стаж</dt>
+            <dd>{doctor?.practiceSince ? `с ${doctor.practiceSince} года` : <span class="doctor__ph">—</span>}</dd>
+          </div>
+          <div>
+            <dt>Образование</dt>
+            <dd>
+              {doctor?.credentials?.length
+                ? doctor.credentials.join('; ')
+                : <span class="doctor__ph">—</span>}
+            </dd>
+          </div>
+        </dl>
+      </>
+    )}
+
+    {variant === 'compact' && doctor?.bio && <p class="doctor__bio doctor__bio--short">{doctor.bio}</p>}
+
+    <div class="doctor__action">
+      {doctor?.href ? (
+        <a class="btn btn--text doctor__link" href={doctor.href}>
+          Профиль врача
+          <svg class="btn__icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M1 8h13M9 3l5 5-5 5" stroke="currentColor" stroke-width="1.3" />
+          </svg>
+        </a>
+      ) : (
+        <p class="doctor__link doctor__link--disabled">
+          Профиль врача скоро появится
+        </p>
+      )}
+    </div>
+  </div>
+
+</article>
+
+<style>
+  .doctor {
+    position: relative;
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+    color: var(--color-text);
+  }
+  .doctor--compact {
+    padding: var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-card);
+  }
+  @media (hover: hover) {
+    .doctor--compact { transition: box-shadow 180ms var(--ease-standard), transform 180ms var(--ease-standard); }
+    .doctor--compact:hover { box-shadow: var(--shadow-card-hover); transform: var(--lift); }
+    @media (prefers-reduced-motion: reduce) {
+      .doctor--compact:hover { transform: none; }
+    }
+  }
+
+  /* ---------- Photo ---------- */
+  .doctor__photo {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-subtle);
+  }
+  .doctor__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 25%;          /* keep faces in frame */
+    transition: transform var(--duration-reveal) var(--ease-out);
+  }
+  @media (hover: hover) {
+    .doctor:hover .doctor__photo img { transform: scale(1.03); }
+  }
+
+  .doctor__photo-placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: end start;
+    padding: var(--space-4);
+    background:
+      radial-gradient(60% 45% at 50% 38%, color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 70%),
+      linear-gradient(180deg, var(--color-bg-subtle), var(--color-bg-accent));
+  }
+  /* Portrait crop guide — a plain 3:4 photo slot */
+  .doctor__photo-frame {
+    position: absolute;
+    left: 22%;
+    right: 22%;
+    top: 12%;
+    aspect-ratio: 3 / 4;
+    border: 1px dashed color-mix(in srgb, var(--color-accent) 45%, transparent);
+    border-radius: var(--radius-sm);
+  }
+  .doctor__photo-tag {
+    position: relative;
+    font-size: var(--size-label);
+    font-weight: var(--weight-semibold);
+    max-width: 16ch;
+    padding-top: var(--space-2);
+    border-top: 1px dashed var(--color-border-strong);
+    line-height: 1.4;
+    color: var(--color-text-muted);
+  }
+
+  /* ---------- Info ---------- */
+  .doctor__info { display: grid; gap: var(--space-2); align-content: start; }
+
+  .doctor__dept {
+    font-size: var(--size-label);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.01em;
+    color: var(--color-text-accent);
+    line-height: 1.45;
+  }
+  .doctor__name {
+    margin: var(--space-1) 0 0;
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+    font-size: var(--size-title-sm);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+  }
+  .doctor__specialty { font-size: var(--size-small); color: var(--color-text-muted); }
+  .doctor__bio { max-width: 46ch; color: var(--color-text-muted); }
+  .doctor__bio--short { font-size: var(--size-small); }
+
+  /* Placeholder text: visibly a stand-in, never mistaken for content */
+  .doctor__ph {
+    color: var(--color-text-muted);
+    background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--color-border) 70%, transparent) 6px 7px);
+    border-radius: var(--radius-xs);
+    padding-inline: 0.2em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .doctor__facts {
+    display: grid;
+    margin: var(--space-3) 0 0;
+    border-top: 1px solid var(--color-border);
+    font-size: var(--size-small);
+  }
+  .doctor__facts div {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr);
+    gap: var(--space-4);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .doctor__facts dt { color: var(--color-text-muted); }
+  .doctor__facts dd { margin: 0; }
+
+  .doctor__action { margin-top: var(--space-2); }
+  .doctor__link--disabled {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    font-size: var(--size-small);
+    color: var(--color-text-muted);
+    cursor: default;
+  }
+
+
+  /* ---------- Featured ---------- */
+  .doctor--featured .doctor__name { font-size: clamp(2.25rem, 1.6rem + 2.4vw, 3.75rem); line-height: 1.04; }
+  .doctor--featured .doctor__specialty { font-size: var(--size-body); }
+  .doctor--featured .doctor__bio { margin-top: var(--space-4); font-size: var(--size-body-lg); line-height: var(--leading-relaxed); }
+  .doctor--featured .doctor__photo { aspect-ratio: 4 / 5; }
+
+  @media (max-width: 47.99rem) {
+    .doctor--featured .doctor__photo { aspect-ratio: 4 / 3; }
+    .doctor--placeholder.doctor--featured .doctor__facts { display: none; }
+    .doctor--compact .doctor__photo { aspect-ratio: 4 / 5; }
+    .doctor { gap: var(--space-4); }
+    .doctor--featured .doctor__bio { margin-top: var(--space-2); font-size: var(--size-body); }
+    .doctor--featured .doctor__name { font-size: 2rem; }
+  }
+
+  @media (min-width: 48rem) {
+    .doctor--featured {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: var(--col-gap-tight); /* in-card photo + text pairing */
+      align-items: end;
+    }
+    .doctor--featured .doctor__info { padding-bottom: var(--space-4); }
+  }
+</style>

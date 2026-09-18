@@ -1,0 +1,125 @@
+---
+// Full promotion list with category filters.
+// Filters are progressive enhancement: without JS all offers are listed.
+import PromotionCard from './PromotionCard.astro';
+import { promotions as allPromotions, promoCategories as allCategories, type Promotion } from '../../data/promotions';
+
+interface Props {
+  /** Promotion ids already presented above the list */
+  exclude?: string[];
+}
+const { exclude = [] } = Astro.props;
+const promotions: Promotion[] = allPromotions.filter((p) => !exclude.includes(p.id));
+const promoCategories = allCategories.filter((c) => promotions.some((p) => p.category === c.id));
+const counts = Object.fromEntries(
+  promoCategories.map((c) => [c.id, promotions.filter((p) => p.category === c.id).length]),
+);
+---
+<div class="promo-list" data-promo-list>
+  <div class="promo-filters" role="group" aria-label="Фильтр акций по направлению" data-promo-filters hidden>
+    <button type="button" class="promo-filter" aria-pressed="true" data-filter="all">
+      Все <span class="promo-filter__count t-num">{promotions.length}</span>
+    </button>
+    {promoCategories.map((c) => (
+      <button type="button" class="promo-filter" aria-pressed="false" data-filter={c.id}>
+        {c.label} <span class="promo-filter__count t-num">{counts[c.id]}</span>
+      </button>
+    ))}
+  </div>
+
+  <p class="visually-hidden" aria-live="polite" data-promo-status></p>
+
+  <div class="promo-list__grid">
+    {promotions.map((p) => <PromotionCard promo={p} variant="standard" />)}
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-promo-list]').forEach((root) => {
+    const bar = root.querySelector<HTMLElement>('[data-promo-filters]')!;
+    const buttons = [...bar.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-promo]')];
+    const status = root.querySelector<HTMLElement>('[data-promo-status]')!;
+
+    const apply = (filter: string) => {
+      let shown = 0;
+      cards.forEach((card) => {
+        const match = filter === 'all' || card.dataset.category === filter;
+        card.hidden = !match;
+        card.classList.remove('is-entering');
+        if (match) {
+          // restart the short enter animation, staggered by visible position
+          card.style.setProperty('--enter-index', String(Math.min(shown, 5)));
+          void card.offsetWidth;
+          card.classList.add('is-entering');
+          shown++;
+        }
+      });
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === filter)));
+      status.textContent = `Показано акций: ${shown}`;
+    };
+
+    buttons.forEach((b) => b.addEventListener('click', () => apply(b.dataset.filter!)));
+    bar.hidden = false;
+  });
+</script>
+
+<style>
+  .promo-filters {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-7);
+    padding-bottom: var(--space-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* bleed to screen edge on mobile so chips can scroll naturally */
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    scroll-padding-inline: var(--gutter);
+  }
+  .promo-filters::-webkit-scrollbar { display: none; }
+  .promo-filters[hidden] { display: none; }
+
+  @media (min-width: 64rem) {
+    .promo-filters { flex-wrap: wrap; overflow: visible; margin-inline: 0; padding-inline: 0; }
+  }
+
+  .promo-filter {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--touch-target);
+    padding: 0 var(--space-4);
+    background: transparent;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    font-size: var(--size-small);
+    font-weight: var(--weight-medium);
+    color: var(--color-text);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color var(--duration-fast) var(--ease-standard),
+                border-color var(--duration-fast) var(--ease-standard),
+                color var(--duration-fast) var(--ease-standard);
+  }
+  .promo-filter:hover { border-color: var(--color-text); }
+  .promo-filter[aria-pressed="true"] {
+    background: var(--color-text);
+    border-color: var(--color-text);
+    color: var(--color-bg);
+  }
+  .promo-filter:focus-visible { border-radius: var(--radius-pill); }
+  .promo-filter__count { font-size: var(--size-label); opacity: 0.7; }
+
+  .promo-list__grid {
+    display: grid;
+    gap: var(--space-7) var(--grid-gap);
+  }
+  @media (min-width: 48rem) {
+    .promo-list__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 80rem) {
+    .promo-list__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+</style>

@@ -1,0 +1,209 @@
+---
+// About Alfa-Klinik — two-column editorial layout. Facts only (see data/about.ts).
+import Section from '../layout/Section.astro';
+import Button from '../ui/Button.astro';
+import { about, otherDepartments } from '../../data/about';
+import { clinic } from '../../data/clinic';
+
+interface Props {
+  image?: { src: string; alt: string; width: number; height: number };
+}
+const { image } = Astro.props;
+---
+<Section join width="wide" labelledby="about-title" class="about">
+  <div class="about__grid">
+    <figure class="about__media">
+      <div class="about__frame" data-reveal="image">
+        {image ? (
+          <img src={image.src} alt={image.alt} width={image.width} height={image.height} loading="lazy" decoding="async" />
+        ) : (
+          <div class="about__placeholder" role="img" aria-label="Заглушка: фотография интерьера клиники">
+            <span class="about__placeholder-text">
+              <span class="t-label">Заглушка · интерьер клиники</span>
+              <span class="about__placeholder-title">Интерьер клиники</span>
+            </span>
+          </div>
+        )}
+      </div>
+      <figcaption class="about__caption">
+        <span class="t-num">{clinic.address}</span>
+      </figcaption>
+    </figure>
+
+    <div class="about__content">
+      <p class="t-label" data-reveal="fade">{about.eyebrow}</p>
+
+      <h2 id="about-title" class="t-h2 about__title" data-reveal="slide">
+        {about.heading.lead}{' '}<em>{about.heading.accent}</em>
+      </h2>
+
+      <p class="t-body-lg about__text" data-reveal="slide" style="--reveal-delay: 1">
+        {about.paragraph}
+      </p>
+
+      <ol class="about__points" role="list">
+        {about.points.map((pt, i) => (
+          <li data-reveal="slide" style={`--reveal-delay: ${i + 2}`}>
+            <div>
+              <h3 class="about__point-title">{pt.title}</h3>
+              <p class="t-small t-muted">{pt.text}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      <details class="about__departments" data-reveal="fade">
+        <summary>
+          <span>Все направления центра</span>
+          <span class="accordion__icon" aria-hidden="true"></span>
+        </summary>
+        <ul role="list">
+          {otherDepartments.map((d) => <li>{d}</li>)}
+        </ul>
+      </details>
+
+      <div class="about__footer" data-reveal="fade">
+        <Button href="/contacts" variant="secondary" arrow block="mobile">Контакты и адрес</Button>
+      </div>
+    </div>
+  </div>
+</Section>
+
+<style>
+  /* ---------- Mobile first: image → text → points ---------- */
+  .about__grid { display: grid; gap: var(--space-7); }
+
+  .about__media { margin: 0; display: grid; gap: var(--space-3); }
+  .about__frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--color-border-strong);
+    background: var(--color-bg-subtle);
+  }
+  .about__frame img { width: 100%; height: 100%; object-fit: cover; }
+
+  .about__placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-items: end;
+    padding: var(--space-5);
+    background: linear-gradient(160deg, var(--color-bg-accent) 0%, var(--color-bg-subtle) 100%);
+  }
+  /* Caption — mirrors .tech__placeholder-text */
+  .about__placeholder-text {
+    position: relative;
+    display: grid;
+    gap: var(--space-2);
+    max-width: 26rem;
+    padding-top: var(--space-4);
+    border-top: 1px dashed var(--color-border-strong);
+    color: var(--color-text-muted);
+  }
+  .about__placeholder-title {
+    font-family: var(--font-display);
+    font-size: var(--size-h3);
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  .about__caption {
+    font-size: var(--size-label);
+    color: var(--color-text-muted);
+    letter-spacing: 0.02em;
+  }
+
+  .about__content { display: grid; align-content: start; }
+  .about__title { margin-top: var(--space-4); max-width: 22ch; }
+  .about__title em { display: inline; font-style: normal; } /* one continuous phrase — split-italic is reserved for hero / offer / final */
+  .about__text { margin-top: var(--space-5); max-width: 46ch; }
+
+  .about__points {
+    display: grid;
+    margin: var(--space-7) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-text);
+  }
+  .about__points li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding-block: var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .about__point-title {
+    margin: 0 0 var(--space-1);
+    font-size: var(--size-body);
+    font-weight: var(--weight-semibold);
+    line-height: 1.35;
+  }
+  .about__points .t-small { max-width: 48ch; }
+
+  .about__departments { border-bottom: 1px solid var(--color-border); }
+  .about__departments summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 3.5rem;
+    font-size: var(--size-small);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    list-style: none;
+  }
+  .about__departments summary::-webkit-details-marker { display: none; }
+  .about__departments[open] .accordion__icon::after { transform: rotate(0deg); }
+  .about__departments ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: var(--space-2) var(--space-5);
+    margin: 0;
+    padding: 0 0 var(--space-5);
+    list-style: none;
+    font-size: var(--size-small);
+    color: var(--color-text-muted);
+  }
+
+  .about__footer {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+    margin-top: var(--space-7);
+  }
+
+  @media (max-width: 39.99rem) {
+    .about__frame { aspect-ratio: 4 / 3; }
+    .about__points li { padding-block: var(--space-4); }
+    .about__points { margin-top: var(--space-6); }
+    .about__footer { margin-top: var(--space-6); }
+  }
+
+  /* Tablet: landscape crop so the image doesn't fill a whole screen */
+  @media (min-width: 40rem) and (max-width: 63.99rem) {
+    .about__frame { aspect-ratio: 3 / 2; }
+  }
+
+  /* ---------- Desktop: image left (5), text right (6) ---------- */
+  @media (min-width: 64rem) {
+    .about__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: var(--col-gap);
+      align-items: start;
+    }
+    /* Image stays in view while the text column scrolls past */
+    .about__media {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-6));
+    }
+    .about__frame {
+      aspect-ratio: auto;
+      height: min(calc(100svh - var(--header-height) - var(--space-6) * 2 - 2.5rem), 40rem);
+      min-height: 26rem;
+    }
+    .about__placeholder { padding: var(--space-7); }
+    .about__content { padding-top: var(--space-6); }
+  }
+</style>

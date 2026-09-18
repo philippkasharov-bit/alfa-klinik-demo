@@ -1,0 +1,210 @@
+/* =========================================================================
+   Alfa-Klinik — Design tokens
+   Two layers:
+     1. Primitives  (--palette-*, raw scales)   → never used directly in components
+     2. Semantic    (--color-*, --text-*, ...)  → the only layer components consume
+   Contrast ratios noted are against --color-bg (#F7F6F2) unless stated.
+   ========================================================================= */
+
+:root {
+  /* ---------------------------------------------------------------------
+     1. COLOR — primitives
+     --------------------------------------------------------------------- */
+  --palette-stone-50:  #F7F6F2;  /* brief: background        */
+  --palette-stone-100: #EEF0ED;  /* brief: secondary         */
+  --palette-stone-200: #DDE1DE;  /* brief: border            */
+  --palette-stone-400: #7A8582;  /* added: 3.5:1 control borders   */
+  --palette-stone-600: #5A6563;  /* added: 5.6:1 muted text        */
+  --palette-ink-900:   #17201F;  /* brief: text  (15.6:1)    */
+  --palette-sage-50:   #E5EFEC;  /* brief: light accent      */
+  --palette-sage-100:  #D3E2DE;  /* added: hover on light accent   */
+  --palette-sage-500:  #4F7773;  /* brief: accent (4.6:1; white on it 5.0:1) */
+  --palette-sage-600:  #3E625E;  /* added: accent text/hover (6.2:1) */
+  --palette-sage-700:  #2F4B48;  /* added: pressed state           */
+  --palette-white:     #FFFFFF;
+  --palette-red-600:   #A8412F;  /* added: errors (5.3:1)          */
+
+  /* ---------------------------------------------------------------------
+     1. COLOR — semantic
+     --------------------------------------------------------------------- */
+  --color-bg:               var(--palette-stone-50);
+  --color-bg-subtle:        var(--palette-stone-100);
+  --color-bg-accent:        var(--palette-sage-50);
+  --color-bg-inverse:       var(--palette-ink-900);
+  --color-surface:          var(--palette-white);      /* inputs, raised cards */
+
+  --color-text:             var(--palette-ink-900);
+  --color-text-muted:       var(--palette-stone-600);
+  --color-text-inverse:     var(--palette-stone-50);
+  --color-text-accent:      var(--palette-sage-600);
+
+  --color-accent:           var(--palette-sage-500);
+  --color-accent-hover:     var(--palette-sage-600);
+  --color-accent-active:    var(--palette-sage-700);
+  --color-on-accent:        var(--palette-white);
+  --color-accent-soft:      var(--palette-sage-50);
+  --color-accent-soft-hover:var(--palette-sage-100);
+
+  --color-border:           var(--palette-stone-200);  /* decorative dividers */
+  --color-border-strong:    var(--palette-stone-400);  /* form controls (≥3:1) */
+  --color-border-inverse:   rgb(247 246 242 / 0.18);
+
+  --color-focus:            var(--palette-sage-600);
+  --color-danger:           var(--palette-red-600);
+  --color-placeholder-bg:   repeating-linear-gradient(
+                              135deg,
+                              var(--palette-stone-100) 0 12px,
+                              var(--palette-stone-50) 12px 24px);
+
+  /* ---------------------------------------------------------------------
+     2. TYPOGRAPHY
+     Serif display for editorial moments, grotesk for everything functional.
+     Fluid sizes: clamp(min @ 360px, fluid, max @ 1440px).
+     --------------------------------------------------------------------- */
+  --font-display: "Cormorant Garamond", "Times New Roman", serif;
+  --font-sans:    "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semibold:600;
+
+  /* size scale */
+  --size-display: clamp(3rem,    2.1rem + 4vw,    5.75rem);  /* 48 → 92 */
+  --size-h1:      clamp(2.5rem,  1.95rem + 2.45vw, 4.25rem); /* 40 → 68 */
+  --size-h2:      clamp(2rem,    1.65rem + 1.55vw, 3.125rem);/* 32 → 50 */
+  --size-h3:      clamp(1.375rem,1.25rem + 0.55vw, 1.75rem); /* 22 → 28 */
+  /* Serif title roles — one value per job instead of per-component clamps */
+  --size-title:    clamp(2.25rem, 1.45rem + 2.6vw, 3.5rem);  /* 36 → 56 · chapter titles */
+  --size-row:      clamp(1.625rem, 1.3rem + 1.1vw, 2.5rem);  /* 26 → 40 · accordion row titles */
+  --size-title-sm: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);      /* 24 → 32 · card / step / item titles */
+  --size-body-lg: clamp(1.1875rem,1.1rem + 0.35vw, 1.375rem);/* 19 → 22 */
+  --size-body:    1.125rem;   /* 18 — a full step above secondary copy (16) */
+  --size-small:   1rem;       /* 16 — secondary copy stays comfortable to read */
+  --size-label:   0.8125rem;  /* 13 — sentence-case kicker */
+  --size-nav:     0.9375rem;  /* 15 */
+  --size-button:  0.9375rem;  /* 15 */
+
+  --leading-tight:  1.02;
+  --leading-snug:   1.15;
+  --leading-normal: 1.6;
+  --leading-relaxed:1.7;
+
+  --tracking-display: -0.02em;
+  --tracking-heading: -0.01em;
+  --tracking-body:     0;
+  --tracking-label:    0.01em;
+  --tracking-button:   0.01em;
+
+  --measure-narrow: 38ch;
+  --measure:        62ch;
+
+  /* ---------------------------------------------------------------------
+     3. SPACING — 4px base, deliberately wide top end
+     --------------------------------------------------------------------- */
+  --space-1:  0.25rem;  /*   4 */
+  --space-2:  0.5rem;   /*   8 */
+  --space-3:  0.75rem;  /*  12 */
+  --space-4:  1rem;     /*  16 */
+  --space-5:  1.5rem;   /*  24 */
+  --space-6:  2rem;     /*  32 */
+  --space-7:  3rem;     /*  48 */
+  --space-8:  4rem;     /*  64 */
+  --space-9:  6rem;     /*  96 */
+  --space-10: 8rem;     /* 128 */
+  --space-11: 11rem;    /* 176 */
+
+  /* fluid layout spacing */
+  --gutter:        clamp(1rem, 0.5rem + 2.5vw, 3rem);     /* page side padding 16 → 48 */
+  --grid-gap:      clamp(1rem, 0.6rem + 1.8vw, 2.5rem);   /* 16 → 40 */
+  --stack-gap:     clamp(1.5rem, 1rem + 2vw, 3rem);       /* between blocks in a section */
+
+  /* ---------------------------------------------------------------------
+     12. SECTION SPACING
+     --------------------------------------------------------------------- */
+  --section-sm: clamp(2.5rem, 1.6rem + 4vw, 5rem);  /*  40 →  80 */
+  --section-md: clamp(3.5rem, 2.2rem + 6vw, 8rem);  /*  56 → 128 */
+  --section-lg: clamp(4rem, 2.2rem + 9vw, 11rem);   /*  64 → 176 */
+
+  /* ---------------------------------------------------------------------
+     4. RADIUS — near-square; architecture, not bubbles
+     --------------------------------------------------------------------- */
+  --radius-none: 0;
+  --radius-xs:   2px;    /* inputs, tags */
+  --radius-sm:   4px;    /* cards, images */
+  --radius-md:   8px;    /* rare: modals */
+  --radius-pill: 999px;  /* buttons only */
+
+  /* ---------------------------------------------------------------------
+     5. SHADOWS — used sparingly; borders do most of the work
+     --------------------------------------------------------------------- */
+  --shadow-none: none;
+  --shadow-sm:   0 1px 2px rgb(23 32 31 / 0.04);
+  --shadow-md:   0 2px 6px rgb(23 32 31 / 0.04), 0 12px 32px -12px rgb(23 32 31 / 0.10);
+  --shadow-lg:   0 4px 12px rgb(23 32 31 / 0.05), 0 32px 64px -24px rgb(23 32 31 / 0.18);
+  /* The single elevation used by cards, the callout and interactive surfaces */
+  --shadow-card:       0 5px 26px rgb(23 32 31 / 0.07);
+  --shadow-card-hover: 0 10px 30px rgb(23 32 31 / 0.10);
+  --lift:              translateY(-2px);
+
+  /* ---------------------------------------------------------------------
+     6. CONTAINERS
+     --------------------------------------------------------------------- */
+  --container-narrow: 60rem;  /*  960 — design-system page */
+  --container:        96rem;  /* 1536 — the site standard, used by every page section */
+  --container-wide:   var(--container);  /* kept as an alias so .container--wide keeps working */
+
+  /* Two-column gaps: one default, one intentional exception */
+  --col-gap:        clamp(3rem, -1rem + 6vw, 7rem);   /* 48 → 112 · default */
+  --col-gap-tight:  clamp(2.5rem, -1rem + 5vw, 6rem); /* 40 →  96 · tighter pairing (hero, in-card splits) */
+
+  /* ---------------------------------------------------------------------
+     7. BREAKPOINTS — reference only (CSS vars can't be used in @media).
+        Mirrored in src/styles/breakpoints.ts. Mobile-first: min-width.
+        sm 640 · md 768 · lg 1024 · xl 1280 · 2xl 1536
+     --------------------------------------------------------------------- */
+  --bp-sm: 40rem;
+  --bp-md: 48rem;
+  --bp-lg: 64rem;
+  --bp-xl: 80rem;
+  --bp-2xl: 96rem;
+
+  /* ---------------------------------------------------------------------
+     14. MOTION
+     --------------------------------------------------------------------- */
+  --duration-instant: 100ms;
+  --duration-fast:    180ms;  /* hover, color */
+  --duration-base:    280ms;  /* accordion, small moves */
+  --duration-slow:    520ms;  /* fade / slide in */
+  --duration-reveal:  900ms;  /* image reveal */
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);   /* expo-out, calm settle */
+  --ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);
+
+  --distance-slide: 1rem;     /* small travel reads as confidence, not animation */
+  --scale-settle: 1.04;       /* max image scale during reveal / hover */
+
+  /* ---------------------------------------------------------------------
+     ACCESSIBILITY / MISC
+     --------------------------------------------------------------------- */
+  --touch-target: 2.75rem;  /* 44px min */
+  --focus-ring: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-focus);
+  --header-height: 4.5rem;  /* 72px mobile, 88px from lg */
+  --z-header: 50;
+  --z-overlay: 100;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0ms;
+    --duration-fast:    0ms;
+    --duration-base:    0ms;
+    --duration-slow:    0ms;
+    --duration-reveal:  0ms;
+    --distance-slide:   0;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root { --header-height: 5.5rem; }
+}

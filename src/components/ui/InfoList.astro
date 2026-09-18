@@ -1,0 +1,52 @@
+---
+// Numbered notes list: short title + one sentence. Used for pricing notes and
+// promotion conditions. Hierarchy comes from type and spacing, not boxes.
+interface Props {
+  items: { title: string; text: string }[];
+  headingLevel?: 'h3' | 'h4';
+  columns?: 1 | 2;
+}
+const { items, headingLevel = 'h3', columns = 2 } = Astro.props;
+const H = headingLevel;
+---
+<ol class:list={['info-list', columns === 2 && 'info-list--two']} role="list">
+  {items.map((item, i) => (
+    <li data-reveal="slide" style={`--reveal-delay: ${Math.min(i, 4)}`}>
+      <div>
+        <H class="info-list__title">{item.title}</H>
+        <p class="info-list__text">{item.text}</p>
+      </div>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .info-list {
+    display: grid;
+    gap: var(--space-6) var(--grid-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .info-list li {
+    display: grid;
+    padding-top: var(--space-4);
+    border-top: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+  }
+  .info-list__title {
+    margin: 0 0 var(--space-1);
+    font-size: var(--size-body);
+    font-weight: var(--weight-semibold);
+    line-height: 1.35;
+  }
+  .info-list__text {
+    max-width: 52ch;
+    font-size: var(--size-small);
+    line-height: var(--leading-normal);
+    color: var(--color-text-muted);
+    overflow-wrap: break-word;
+  }
+  @media (min-width: 48rem) {
+    .info-list--two { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-7) var(--grid-gap); }
+  }
+</style>

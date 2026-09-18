@@ -1,0 +1,11 @@
+---
+// /contacts — mirrors the legacy URL contacts.htm. Page files stay style-free.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactSection from '../components/contact/ContactSection.astro';
+---
+<BaseLayout
+  title="Контакты — Альфа-Клиник, Москва, Воронцовские пруды, д. 3"
+  description="Альфа-Клиник: Москва, Воронцовские пруды, д. 3 (вход с ул. Академика Челомея, подъезд 23). Тел.: (499) 739-51-63. Время работы 09:00–21:00, воскресенье — выходной."
+>
+  <ContactSection headingLevel="h1" id="contacts" />
+</BaseLayout>
