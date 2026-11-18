@@ -1,0 +1,131 @@
+---
+// Hero visual: generated 3D molar (public/models/tooth.glb, meshopt + WebP, ~400 KB).
+// A static transparent poster paints first; <model-viewer> is fetched from a pinned CDN
+// only on ≥600px viewports, after window load + idle, and never on Save-Data.
+// Under 600px (and without JS) the poster is the whole experience.
+---
+<div class="tooth" data-tooth>
+  <img
+    class="tooth__poster"
+    src="/models/tooth-poster.webp"
+    alt=""
+    width="800"
+    height="800"
+    loading="eager"
+    decoding="async"
+  />
+  <model-viewer
+    class="tooth__viewer"
+    data-src="/models/tooth.glb"
+    alt="Трёхмерная модель зуба — можно повернуть мышью или пальцем"
+    camera-controls
+    disable-zoom
+    disable-pan
+    interaction-prompt="none"
+    touch-action="pan-y"
+    camera-orbit="-25deg 78deg auto"
+    min-camera-orbit="auto 55deg auto"
+    max-camera-orbit="auto 100deg auto"
+    rotation-per-second="10deg"
+    auto-rotate-delay="0"
+    environment-image="neutral"
+    tone-mapping="neutral"
+    exposure="1.1"
+    shadow-intensity="0.45"
+    shadow-softness="1"
+  ></model-viewer>
+</div>
+
+<script>
+  // Pinned: bump deliberately, never float. model-viewer ≈ 290 KB gz incl. three.js.
+  // (4.3.x ships stray debug console.logs — skip it.)
+  const MODEL_VIEWER = 'https://cdn.jsdelivr.net/npm/@google/model-viewer@4.4.0/dist/model-viewer.min.js';
+  // tooth.glb uses EXT_meshopt_compression; model-viewer loads this as a classic script
+  // (0.25 is the last release with the UMD build that defines a global MeshoptDecoder).
+  const MESHOPT_DECODER = 'https://cdn.jsdelivr.net/npm/meshoptimizer@0.25.0/meshopt_decoder.js';
+  type MVConfig = { meshoptDecoderLocation?: string };
+  const w = window as unknown as { ModelViewerElement?: MVConfig };
+  w.ModelViewerElement = { ...w.ModelViewerElement, meshoptDecoderLocation: MESHOPT_DECODER };
+
+  const root = document.querySelector<HTMLElement>('[data-tooth]');
+  const viewer = root?.querySelector<HTMLElement>('model-viewer');
+  const wide = window.matchMedia('(min-width: 37.5rem)');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+
+  const syncMotion = () => viewer?.toggleAttribute('auto-rotate', !reduced.matches);
+
+  let started = false;
+  function start() {
+    if (started || !root || !viewer || !wide.matches) return;
+    started = true;
+    syncMotion();
+    reduced.addEventListener('change', syncMotion);
+    viewer.addEventListener('load', () => root.classList.add('is-3d'), { once: true });
+    viewer.setAttribute('src', viewer.dataset.src!);
+    const s = document.createElement('script');
+    s.type = 'module';
+    s.src = MODEL_VIEWER;
+    s.crossOrigin = 'anonymous';
+    document.head.append(s);
+  }
+
+  // Wait for LCP-critical work, then idle — the 3D layer is decoration, not content.
+  function schedule() {
+    const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 200));
+    idle(start);
+  }
+
+  if (root && viewer && !saveData) {
+    if (wide.matches) {
+      if (document.readyState === 'complete') schedule();
+      else window.addEventListener('load', schedule, { once: true });
+    }
+    // Phone rotated / window widened past 600px later on.
+    wide.addEventListener('change', () => wide.matches && schedule());
+  }
+</script>
+
+<style>
+  .tooth {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    /* Soft sage halo behind the porcelain — reads as light, not as a backdrop */
+    background:
+      radial-gradient(60% 55% at 50% 46%, color-mix(in srgb, var(--color-surface) 85%, transparent) 0%, transparent 70%),
+      linear-gradient(160deg, var(--color-bg-accent) 0%, var(--color-bg-subtle) 100%);
+  }
+  /* A square stage, centred in the part of the panel that sits above the fold
+     (on desktop the panel overhangs into the next section). */
+  .tooth__poster,
+  .tooth__viewer {
+    grid-area: 1 / 1;
+    width: min(78%, 36rem, 62svh);
+    aspect-ratio: 1;
+    height: auto;
+  }
+  @media (min-width: 64rem) {
+    .tooth { place-items: start center; padding-top: clamp(var(--space-6), 9svh, var(--space-8)); }
+  }
+  .tooth__poster {
+    object-fit: contain;
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+  .tooth__viewer {
+    display: none;
+    --poster-color: transparent;
+    --progress-bar-height: 0px;
+    background: transparent;
+  }
+  .tooth__viewer:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: -4px;
+  }
+  @media (min-width: 37.5rem) {
+    .tooth__viewer:defined { display: block; }
+  }
+  /* Model has rendered its first frame — retire the poster underneath */
+  .tooth.is-3d .tooth__poster { opacity: 0; }
+</style>
