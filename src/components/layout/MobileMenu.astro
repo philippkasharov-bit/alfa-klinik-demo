@@ -199,7 +199,7 @@ const path = Astro.url.pathname;
     letter-spacing: -0.01em;
     color: var(--color-text);
   }
-  .mobile-menu__primary a[aria-current='page'] { font-style: italic; color: var(--color-text-accent); }
+  .mobile-menu__primary a[aria-current='page'] { font-style: normal; /* atlas: no italics (Literata italic not loaded) */ color: var(--color-text-accent); }
   .mobile-menu__index {
     width: 1.5rem;
     flex: none;

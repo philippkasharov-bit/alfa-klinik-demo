@@ -46,9 +46,9 @@ input, textarea { caret-color: var(--color-accent); }
 .t-display { font-size: var(--size-display); line-height: var(--leading-tight); letter-spacing: var(--tracking-display); }
 .t-h1      { font-size: var(--size-h1);      line-height: var(--leading-tight); letter-spacing: var(--tracking-display); }
 .t-h2      { font-size: var(--size-h2);      line-height: var(--leading-snug);  letter-spacing: var(--tracking-heading); }
-/* Serif italic accent inside headings: <em> */
+/* Heading accent: the hero's <em> is set in oxide (roman, atlas style) */
 /* Italic accent is reserved for the homepage hero; elsewhere a heading reads as one phrase */
-.t-display em { font-style: italic; }
+.t-display em { font-style: normal; }
 .t-h1 em, .t-h2 em { font-style: normal; }
 .t-display em { color: var(--color-text-accent); }
 

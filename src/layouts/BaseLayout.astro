@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
-import serifCyr from '@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-500-normal.woff2?url';
-import sansCyr from '@fontsource/manrope/files/manrope-cyrillic-400-normal.woff2?url';
+import serifCyr from '@fontsource/literata/files/literata-cyrillic-400-normal.woff2?url';
+import sansCyr from '@fontsource/ibm-plex-sans/files/ibm-plex-sans-cyrillic-400-normal.woff2?url';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import MobileCallBar from '../components/layout/MobileCallBar.astro';
@@ -22,7 +22,7 @@ const { title, description = '', header = true, footer = true, noindex = false }
     <meta property="og:site_name" content="Альфа-Клиник" />
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
-    <meta name="theme-color" content="#F7F6F2" />
+    <meta name="theme-color" content="#F2EEE6" />
     <!-- Preload the two faces visible above the fold (hero headline + body text). -->
     <link rel="preload" href={serifCyr} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={sansCyr} as="font" type="font/woff2" crossorigin />

@@ -45,9 +45,11 @@ const { view, caption, notes = [], tone = 'light', notesAttrs = {}, class: cls }
     grid-template-rows: minmax(0, 1fr) auto;
     height: 100%;
     margin: 0;
+    --plate-grid: var(--color-border);
     background:
-      radial-gradient(55% 50% at 42% 46%, color-mix(in srgb, var(--color-surface) 90%, transparent) 0%, transparent 72%),
-      linear-gradient(160deg, var(--color-bg-accent) 0%, var(--color-bg-subtle) 100%);
+      linear-gradient(var(--plate-grid) 1px, transparent 1px) 0 0 / 100% 25%,
+      linear-gradient(90deg, var(--plate-grid) 1px, transparent 1px) 0 0 / 25% 100%,
+      var(--color-bg-subtle);
     color: var(--plate-fg);
     overflow: hidden;
   }
@@ -55,8 +57,10 @@ const { view, caption, notes = [], tone = 'light', notesAttrs = {}, class: cls }
     --plate-fg: var(--color-text-inverse);
     --plate-muted: color-mix(in srgb, var(--color-text-inverse) 70%, transparent);
     --plate-rule: color-mix(in srgb, var(--color-text-inverse) 30%, transparent);
+    --plate-grid: color-mix(in srgb, var(--color-text-inverse) 12%, transparent);
     background:
-      radial-gradient(50% 45% at 42% 48%, color-mix(in srgb, var(--color-accent) 38%, transparent) 0%, transparent 75%),
+      linear-gradient(var(--plate-grid) 1px, transparent 1px) 0 0 / 100% 25%,
+      linear-gradient(90deg, var(--plate-grid) 1px, transparent 1px) 0 0 / 25% 100%,
       color-mix(in srgb, var(--color-bg-inverse) 92%, var(--color-text-inverse));
   }
 
@@ -92,13 +96,14 @@ const { view, caption, notes = [], tone = 'light', notesAttrs = {}, class: cls }
     margin: 0;
     padding: 0;
     list-style: none;
-    font-size: var(--size-label);
-    font-weight: var(--weight-medium);
-    letter-spacing: var(--tracking-label);
+    counter-reset: note;
+    font: var(--weight-regular) 0.75rem/1.35 var(--font-mono);
+    letter-spacing: 0.01em;
     color: var(--plate-fg);
   }
   .specimen__notes[hidden] { display: none; }
   .specimen__notes li {
+    counter-increment: note;
     display: flex;
     align-items: center;
     gap: var(--space-3);
@@ -108,17 +113,27 @@ const { view, caption, notes = [], tone = 'light', notesAttrs = {}, class: cls }
     flex: none;
     width: clamp(1.5rem, 4vw, 3.5rem);
     height: 1px;
-    background: var(--plate-rule);
+    background: var(--color-accent);
   }
+  .specimen--dark .specimen__notes li::before { background: var(--plate-rule); }
+  .specimen__notes li::after {
+    content: counter(note, decimal-leading-zero);
+    order: -1;
+    color: var(--color-text-accent);
+  }
+  .specimen--dark .specimen__notes li::after { color: var(--plate-muted); }
 
   .specimen__caption {
     padding: var(--space-4) var(--space-5);
-    border-top: 1px solid var(--plate-rule);
-    font-size: var(--size-label);
-    font-weight: var(--weight-medium);
-    letter-spacing: var(--tracking-label);
-    color: var(--plate-muted);
+    border-top: 1px solid var(--plate-fg);
+    background: var(--color-bg);
+    font: var(--weight-regular) 0.75rem/1.3 var(--font-mono);
+    letter-spacing: 0.02em;
+    color: var(--color-text-muted);
   }
+  .specimen--dark .specimen__caption { background: transparent; color: var(--plate-muted); }
+  .specimen__caption::before { content: "Рис. — "; color: var(--color-text-accent); }
+  .specimen--dark .specimen__caption::before { color: var(--plate-muted); }
 
   /* With notes the tooth shifts left so labels never sit on it */
   .specimen__stage:has(.specimen__notes:not([hidden])) .specimen__img {
