@@ -1,3 +1,5 @@
+import { promoValidity } from './promotions';
+
 // Major dental service categories. Structure follows the six departments listed
 // on alfaklinik.ru/stomatology.htm plus professional hygiene, which the site
 // presents as its own service and headline offer. Descriptions are condensed
@@ -39,7 +41,7 @@ export const services: Service[] = [
     description:
       'Комплексная чистка из семи процедур. По желанию — обучение правильной чистке зубов.',
     includes: ['Ультразвуковая чистка отложений', 'Air-Flow', 'Лечебная обработка дёсен', 'Полировка и фторирование'],
-    offer: 'Акция 3 900 ₽ — запись до 27 сентября 2026',
+    offer: `Акция 3 900 ₽ — ${promoValidity.suffix}`,
     priceHref: '/price#price-therapy',
     imageLabel: 'гигиенический кабинет',
     source: 'paratendologiya.htm; skidki.htm',
@@ -83,7 +85,7 @@ export const services: Service[] = [
     description:
       'Функциональное и эстетическое протезирование, включая протезирование на имплантатах. Коронки «под ключ»: работа врача, слепки, анестезия, снимки и лабораторная часть.',
     includes: ['Металлокерамика DUCERAM, VITA, Noritake', 'Коронки из оксида циркония'],
-    offer: 'Коронки по акции от 12 700 ₽ — запись до 27 сентября 2026',
+    offer: `Коронки по акции от 12 700 ₽ — ${promoValidity.suffix}`,
     priceHref: '/price#price-orthopedics',
     imageLabel: 'зуботехническая работа',
     source: 'stamotologia4.htm; stomatology.htm; skidki.htm',

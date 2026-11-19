@@ -16,10 +16,6 @@ const { image } = Astro.props;
   <div class="container container--wide hero__grid">
     <div class="hero__content">
       <div class="hero__main">
-      <p class="t-label hero__eyebrow" data-reveal="fade">
-        Стоматология · {clinic.city}
-      </p>
-
       <!-- No reveal on the headline/lead: they are the LCP candidates and must paint without waiting for JS -->
       <h1 id="hero-title" class="t-display hero__title">
         Внимательная стоматология <em>и понятное лечение</em>
@@ -88,7 +84,6 @@ const { image } = Astro.props;
   .hero__media { order: 2; }
   .hero__facts { order: 3; }
 
-  .hero__eyebrow { margin-bottom: var(--space-4); }
 
   .hero__title {
     max-width: 17ch;   /* two-to-three confident lines on desktop, not a narrow column */

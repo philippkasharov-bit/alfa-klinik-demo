@@ -40,7 +40,7 @@ export interface PriceCategory {
 const p = (id: string) => promotions.find((x) => x.id === id)!;
 // Short per-row tag; the deadline is stated once per category (offerNote) to keep rows scannable.
 const OFFER = 'Цена по акции';
-export const offerNote = `Цены по акции действуют при записи до ${promoValidity.label.replace('Запись по акциям — до ', '')}.`;
+export const offerNote = promoValidity.sentence;
 
 const placeholderRow = (what: string): PriceRow => ({
   name: `${what}: полный перечень услуг`,
@@ -53,7 +53,6 @@ const fillings = p('fillings');
 const zirconia = p('crown-zirconia');
 
 export const pricing = {
-  eyebrow: 'Цены',
   heading: { lead: 'Стоимость', accent: 'лечения' },
   /** Verbatim from price.htm */
   sourceNotice: 'Цены прайс-листа могут меняться вместе с финансовой обстановкой — актуальные уточняйте у администратора. Это не касается уже начатого лечения.',

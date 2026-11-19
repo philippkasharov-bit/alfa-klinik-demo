@@ -4,34 +4,28 @@
 //   mobile  — image, heading, chapters stacked (no scroll-linked behaviour)
 import Section from '../layout/Section.astro';
 import { technology } from '../../data/technology';
+import Specimen from '../ui/Specimen.astro';
 
 const { chapters } = technology;
+const views = ['front', 'profile', 'low', 'back'] as const;
 ---
 <Section width="wide" tone="accent" labelledby="tech-title" class="tech">
   <div class="tech__grid" data-tech>
     <!-- Visual -->
     <div class="tech__visual">
       <div class="tech__frame" data-reveal="image">
-        <div class="tech__placeholder" role="img" aria-label="Заглушка: фотография оборудования клиники">
-          <span class="tech__corners" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-
-          <span class="tech__readout" aria-hidden="true">
-            <span class="tech__readout-num t-num" data-tech-num>01</span>
-            <span class="tech__readout-label" data-tech-label>{chapters[0].imageLabel}</span>
-          </span>
-
-          <span class="tech__placeholder-text">
-            <span class="t-label">Заглушка · фото оборудования</span>
-            <span class="tech__placeholder-title">Оборудование клиники</span>
-          </span>
-        </div>
+        <Specimen
+          view={views[0]}
+          notes={chapters[0].details}
+          caption={chapters[0].title}
+          notesAttrs={{ 'data-tech-notes': '', 'aria-hidden': 'true' }}
+        />
       </div>
     </div>
 
     <!-- Text -->
     <div class="tech__content">
       <header class="tech__head">
-        <p class="t-label" data-reveal="fade">{technology.eyebrow}</p>
         <h2 id="tech-title" class="t-h2 tech__title" data-reveal="slide">
           {technology.heading.lead}{' '}<em>{technology.heading.accent}</em>
         </h2>
@@ -44,10 +38,11 @@ const { chapters } = technology;
             class="tech__chapter"
             data-tech-chapter
             data-num={String(i + 1).padStart(2, '0')}
-            data-label={c.imageLabel}
+            data-label={c.title}
+            data-view={views[i % views.length]}
+            data-details={JSON.stringify(c.details)}
             data-reveal="slide"
           >
-            <span class="tech__chapter-ghost" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
             <span class="tech__chapter-num t-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
             <div class="tech__chapter-body">
               <h3 class="tech__chapter-title">{c.title}</h3>
@@ -65,29 +60,34 @@ const { chapters } = technology;
 
 <script>
   // Desktop only: highlight the chapter nearest the viewport centre and
-  // mirror its number/label into the image readout.
+  // mirror its title, details and plate view into the specimen.
   const DESKTOP = window.matchMedia('(min-width: 64rem)');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   document.querySelectorAll<HTMLElement>('[data-tech]').forEach((root) => {
     const chapters = [...root.querySelectorAll<HTMLElement>('[data-tech-chapter]')];
-    const num = root.querySelector<HTMLElement>('[data-tech-num]');
-    const label = root.querySelector<HTMLElement>('[data-tech-label]');
-    if (!chapters.length || !num || !label) return;
+    const notes = root.querySelector<HTMLElement>('[data-tech-notes]');
+    const label = root.querySelector<HTMLElement>('figcaption');
+    const img = root.querySelector<HTMLImageElement>('.tech__frame img');
+    if (!chapters.length || !notes || !label || !img) return;
+    // Warm the other plates so a swap never shows an empty frame
+    chapters.forEach((c) => { const i = new Image(); i.src = `/models/tooth-${c.dataset.view}.webp`; });
 
     // Readout swap always resolves to the latest target, even during fast scrolling.
     let target: HTMLElement = chapters[0];
     let timer = 0;
     const swap = () => {
       timer = 0;
-      num.textContent = target.dataset.num ?? '';
       label.textContent = target.dataset.label ?? '';
+      img.src = `/models/tooth-${target.dataset.view}.webp`;
+      const items = JSON.parse(target.dataset.details ?? '[]') as string[];
+      notes.replaceChildren(...items.slice(0, 4).map((t) => Object.assign(document.createElement('li'), { textContent: t })));
       root.classList.remove('is-swapping');
     };
     const activate = (el: HTMLElement) => {
       chapters.forEach((c) => c.classList.toggle('is-current', c === el));
       target = el;
-      if (num.textContent === el.dataset.num && !timer) return;
+      if (label.textContent === el.dataset.label && !timer) return;
       if (reduced.matches) return swap();
       root.classList.add('is-swapping');
       if (!timer) timer = window.setTimeout(swap, 180);
@@ -133,75 +133,11 @@ const { chapters } = technology;
     aspect-ratio: 4 / 3;
     overflow: hidden;
     border-radius: var(--radius-sm);
-    border: 1px dashed var(--color-border-strong);
   }
-
-  /* Same light placeholder treatment as the hero and services images */
-  .tech__placeholder {
-    --line-strong: color-mix(in srgb, var(--color-accent) 40%, transparent);
-    position: absolute;
-    inset: 0;
-    display: grid;
-    align-items: end;
-    padding: var(--space-5);
-    background: linear-gradient(160deg, var(--color-bg) 0%, var(--color-bg-subtle) 100%);
-    color: var(--color-text);
-  }
-
-  .tech__corners i {
-    position: absolute;
-    width: 1.25rem;
-    height: 1.25rem;
-    border-color: var(--line-strong);
-    border-style: solid;
-    border-width: 0;
-  }
-  .tech__corners i:nth-child(1) { top: 1rem; left: 1rem; border-top-width: 1px; border-left-width: 1px; }
-  .tech__corners i:nth-child(2) { top: 1rem; right: 1rem; border-top-width: 1px; border-right-width: 1px; }
-  .tech__corners i:nth-child(3) { bottom: 1rem; left: 1rem; border-bottom-width: 1px; border-left-width: 1px; }
-  .tech__corners i:nth-child(4) { bottom: 1rem; right: 1rem; border-bottom-width: 1px; border-right-width: 1px; }
-
-
-  .tech__readout {
-    position: absolute;
-    left: 10%;
-    top: 12%;
-    display: grid;
-    gap: var(--space-2);
-    transition: opacity var(--duration-fast) var(--ease-standard), transform var(--duration-base) var(--ease-out);
-  }
-  .is-swapping .tech__readout { opacity: 0; transform: translateY(0.5rem); }
-  .tech__readout-num {
-    font-family: var(--font-display);
-    font-size: clamp(3.5rem, 2rem + 6vw, 8rem);
-    line-height: 0.9;
-    font-style: italic;
-    color: color-mix(in srgb, var(--color-accent) 45%, transparent);
-  }
-  .tech__readout-label {
-    font-size: var(--size-label);
-    font-weight: var(--weight-semibold);
-    letter-spacing: 0.01em;
-    color: var(--color-text-accent);
-  }
-  /* Mobile has no scroll linking: show a neutral label instead of a chapter */
-  .tech__grid:not(.is-linked) .tech__readout { display: none; }
-
-  .tech__placeholder-text {
-    position: relative;
-    display: grid;
-    gap: var(--space-2);
-    max-width: 26rem;
-    padding-top: var(--space-4);
-    border-top: 1px dashed var(--color-border-strong);
-    color: var(--color-text-muted);
-  }
-  .tech__placeholder-title {
-    font-family: var(--font-display);
-    font-size: var(--size-h3);
-    line-height: 1.2;
-    color: var(--color-text);
-  }
+  .tech__frame :global(.specimen__img),
+  .tech__frame :global(.specimen__notes) { transition: opacity var(--duration-fast) var(--ease-standard); }
+  .tech__grid.is-swapping .tech__frame :global(.specimen__img),
+  .tech__grid.is-swapping .tech__frame :global(.specimen__notes) { opacity: 0; }
 
   .tech__head { display: grid; gap: var(--space-4); }
   /* Chapter-opening headline: same enlarged scale as the hero and services */
@@ -227,16 +163,6 @@ const { chapters } = technology;
     padding-block: var(--space-6);
     border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
   }
-  /* Ghost numeral — same values as .service__visual-num (desktop only, like Services) */
-  .tech__chapter-ghost { display: none; }
-  /* Alternating segments: odd rows keep the section's light accent, even rows take the secondary surface */
-  .tech__chapter { padding-inline: var(--space-4); }
-  .tech__chapter:nth-child(even) {
-    background: var(--color-bg-subtle);
-    border-radius: var(--radius-sm);
-    border-bottom-color: transparent;
-  }
-  .tech__chapter:has(+ .tech__chapter:nth-child(even)) { border-bottom-color: transparent; }
   .tech__chapter-num {
     padding-top: 0.45rem;
     font-size: var(--size-label);
@@ -311,30 +237,9 @@ const { chapters } = technology;
       height: min(calc(100svh - var(--header-height) - var(--space-6) * 2), 40rem);
       min-height: 26rem;
     }
-    .tech__placeholder { padding: var(--space-7); }
 
     .tech__chapters { margin-top: var(--space-9); }
     .tech__chapter { position: relative; padding-block: var(--space-7); overflow: hidden; isolation: isolate; }
-    /* One index per chapter: the ghost numeral carries it on desktop */
-    .tech__chapter { grid-template-columns: minmax(0, 1fr); }
-    .tech__chapter-num { display: none; }
-    .tech__chapter-ghost {
-      display: block;
-      position: absolute;
-      z-index: -1;
-      top: -0.12em;
-      right: var(--space-5);
-      font-family: var(--font-display);
-      font-size: clamp(8rem, 4rem + 8vw, 13rem);
-      line-height: 1;
-      font-style: italic;
-      color: color-mix(in srgb, var(--color-accent) 22%, transparent);
-      pointer-events: none;
-      transform: translateY(0.75rem) scale(1.04);
-      transition: transform var(--duration-reveal) var(--ease-out);
-    }
-    .tech__grid:not(.is-linked) .tech__chapter-ghost,
-    .tech__chapter.is-current .tech__chapter-ghost { transform: none; }
 
     /* Scroll-linked emphasis: quiet by default, current chapter at full strength */
     /* Current chapter is emphasised by title colour, index colour and a small shift.

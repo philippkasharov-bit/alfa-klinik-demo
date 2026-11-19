@@ -132,10 +132,8 @@ const { row } = Astro.props;
   .price-row--placeholder .price-row__name,
   .price-row--placeholder .price-row__detail {
     justify-self: start;
-    padding-inline: 0.2em;
-    border-radius: var(--radius-xs);
     color: var(--color-text-muted);
-    background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--color-border) 70%, transparent) 6px 7px);
+    font-style: normal; /* atlas: no italics (Literata italic not loaded) */
   }
   .price-row--placeholder .price-row__price { color: var(--color-text-muted); }
 

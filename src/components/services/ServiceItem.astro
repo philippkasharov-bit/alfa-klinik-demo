@@ -5,6 +5,7 @@
 // Without JS every panel is simply visible under its row.
 import type { Service } from '../../data/services';
 import { clinic } from '../../data/clinic';
+import Specimen from '../ui/Specimen.astro';
 
 interface Props {
   service: Service;
@@ -12,7 +13,8 @@ interface Props {
 }
 const { service: s, index } = Astro.props;
 const id = `service-${s.slug}`;
-const num = String(index + 1).padStart(2, '0');
+const views = ['front', 'low', 'profile', 'back'] as const;
+const view = views[index % views.length];
 ---
 <li
   class="service"
@@ -30,7 +32,6 @@ const num = String(index + 1).padStart(2, '0');
       aria-controls={`${id}-panel`}
       data-service-trigger
     >
-      <span class="service__num t-num" aria-hidden="true">{num}</span>
       <span class="service__titles">
         <span class="service__name">{s.name}</span>
         <span class="service__summary">{s.summary}</span>
@@ -45,9 +46,8 @@ const num = String(index + 1).padStart(2, '0');
 
   <div class="service__panel" id={`${id}-panel`} role="region" aria-labelledby={`${id}-trigger`} data-service-panel>
     <div class="service__panel-inner">
-      <div class="service__visual" role="img" aria-label={`Заглушка: ${s.imageLabel}`}>
-        <span class="service__visual-num" aria-hidden="true">{num}</span>
-        <span class="t-label">Заглушка · {s.imageLabel}</span>
+      <div class="service__visual">
+        <Specimen view={view} notes={s.includes} />
       </div>
 
       <div class="service__body">

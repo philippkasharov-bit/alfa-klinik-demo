@@ -24,7 +24,6 @@ const yandexWidget = `https://yandex.ru/map-widget/v1/?ll=${lon}%2C${lat}&z=16&p
     <!-- ===== LEFT ===== -->
     <div class="contact__left">
       <header class="contact__head">
-        <p class="t-label" data-reveal="fade">Запись на приём</p>
         <H id={`${id}-title`} class="contact__title" data-reveal="slide">
           Приходите <em>на консультацию</em>
         </H>
@@ -162,13 +161,7 @@ const yandexWidget = `https://yandex.ru/map-widget/v1/?ll=${lon}%2C${lat}&z=16&p
   .contact__cta { margin-top: var(--space-2); }
   .contact__cta :global(.btn) { white-space: normal; text-align: center; line-height: 1.25; padding-block: var(--space-3); }
 
-  /* ---------- Form card: the one raised surface in the section ---------- */
-  .contact__form {
-    padding: clamp(1.25rem, 0.8rem + 2vw, 2.5rem);
-    background: var(--color-surface);
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-sm);
-  }
+  /* Form: AppointmentForm draws its own raised card — no second surface around it */
 
   /* ---------- Facts ---------- */
   .contact__facts { display: grid; margin: 0; border-top: 1px solid var(--color-text); }

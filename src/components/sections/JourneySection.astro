@@ -7,7 +7,6 @@ import { journey } from '../../data/journey';
 <Section join width="wide" ruled labelledby="journey-title" id="journey" class="journey">
   <header class="journey__head">
     <div class="journey__head-main">
-      <p class="t-label" data-reveal="fade">{journey.eyebrow}</p>
       <h2 id="journey-title" class="t-h2" data-reveal="slide">
         {journey.heading.lead}{' '}<em>{journey.heading.accent}</em>
       </h2>
@@ -109,7 +108,7 @@ import { journey } from '../../data/journey';
     padding-block: 0.1rem;
     background: var(--color-bg);          /* masks the rail behind the number (section is on --color-bg) */
     font-family: var(--font-display);
-    font-style: italic;
+    font-style: normal; /* atlas: no italics (Literata italic not loaded) */
     font-size: 1.375rem;
     line-height: 1.6;
     color: var(--color-text-accent);

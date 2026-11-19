@@ -35,7 +35,6 @@ const pendingList = pendingCats
   {!isPage && (
   <header class="pricing__head">
     <div class="pricing__head-main">
-      <p class="t-label" data-reveal="fade">{pricing.eyebrow}</p>
       <H id={`${id}-title`} class="t-h2" data-reveal="slide">
         {pricing.heading.lead}{' '}<em>{pricing.heading.accent}</em>
       </H>
@@ -274,7 +273,7 @@ const pendingList = pendingCats
   .pricing__free-price {
     font-family: var(--font-display);
     font-size: var(--size-title-sm);
-    font-style: italic;
+    font-style: normal; /* atlas: no italics (Literata italic not loaded) */
     line-height: 1;
     color: var(--color-text-accent);
   }
