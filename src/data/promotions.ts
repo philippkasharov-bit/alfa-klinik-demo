@@ -6,11 +6,30 @@
 // №1–4, orthodontics 2-year payment plan). They reference a "СУПЕР АКЦИЯ 2500"
 // that no longer exists on skidki.htm, so they need client confirmation.
 
-export const promoValidity = {
-  until: '2026-09-27',
-  label: 'Запись по акциям — до 27 сентября 2026',
-  short: 'до 27.09.2026',
-};
+// The published booking deadline. Evaluated at build time: once it has passed, the
+// site stops quoting a stale date and points visitors to the administrator instead
+// (prices stay as published on skidki.htm). Rebuild/redeploy to refresh.
+const PROMO_UNTIL = '2026-09-27';
+const promoExpired = Date.now() > Date.parse(`${PROMO_UNTIL}T23:59:59+03:00`);
+
+export const promoValidity = promoExpired
+  ? {
+      until: PROMO_UNTIL,
+      expired: true,
+      label: 'Сроки действия акций уточняйте у администратора',
+      short: 'срок уточняйте',
+      /** Appended to offer lines: «… — <suffix>» */
+      suffix: 'срок уточняйте у администратора',
+      sentence: 'Сроки действия акций уточняйте у администратора клиники.',
+    }
+  : {
+      until: PROMO_UNTIL,
+      expired: false,
+      label: 'Запись по акциям — до 27 сентября 2026',
+      short: 'до 27.09.2026',
+      suffix: 'запись до 27 сентября 2026',
+      sentence: 'Цены по акции действуют при записи до 27 сентября 2026.',
+    };
 
 export type PromoCategory = 'hygiene' | 'therapy' | 'aesthetics' | 'prosthetics' | 'general';
 
@@ -215,7 +234,7 @@ export const promoRules = [
  * price.htm («актуальные цены уточняйте у оператора»).
  */
 export const promoConditions = [
-  { title: 'Срок записи', text: 'Запись по всем стоматологическим акциям — до 27 сентября 2026 года.' },
+  { title: 'Срок записи', text: promoValidity.sentence },
   { title: 'Акции суммируются', text: 'Акции не исключают друг друга, их можно использовать в любом количестве.' },
   { title: 'Всё включено', text: 'В акционную цену входит всё, что указано в описании акции. Скрытых платежей нет.' },
   { title: 'Условия конкретной акции', text: 'Ограничения указаны в карточке — например, акция на металлокерамику DUCERAM действует только на эти коронки.' },

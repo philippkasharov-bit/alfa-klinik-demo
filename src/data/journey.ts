@@ -16,7 +16,6 @@ export interface JourneyStep {
 }
 
 export const journey = {
-  eyebrow: 'Как проходит лечение',
   heading: { lead: 'Пять шагов', accent: 'от консультации до гарантии' },
   intro: 'Что происходит на каждом этапе — от первого визита до завершения лечения.',
   steps: [

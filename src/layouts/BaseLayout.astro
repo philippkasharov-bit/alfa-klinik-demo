@@ -16,6 +16,12 @@ const { title, description = '', header = true, footer = true, noindex = false }
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:site_name" content="Альфа-Клиник" />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
     <meta name="theme-color" content="#F7F6F2" />
     <!-- Preload the two faces visible above the fold (hero headline + body text). -->
     <link rel="preload" href={serifCyr} as="font" type="font/woff2" crossorigin />

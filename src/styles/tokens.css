@@ -51,10 +51,7 @@
 
   --color-focus:            var(--palette-sage-600);
   --color-danger:           var(--palette-red-600);
-  --color-placeholder-bg:   repeating-linear-gradient(
-                              135deg,
-                              var(--palette-stone-100) 0 12px,
-                              var(--palette-stone-50) 12px 24px);
+  --color-placeholder-bg:   var(--palette-stone-100);
 
   /* ---------------------------------------------------------------------
      2. TYPOGRAPHY

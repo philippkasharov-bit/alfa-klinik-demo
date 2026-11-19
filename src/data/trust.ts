@@ -42,7 +42,7 @@ export const materials = [
   { name: 'Gradia', origin: 'Япония', use: 'пломбы' },
   { name: 'Estelite', origin: 'Япония', use: 'пломбы' },
   { name: 'Kerr', origin: 'США', use: 'пломбы' },
-  { name: 'Philips ZOOM 4', origin: null, use: 'отбеливание' },
+  { name: 'Philips ZOOM 4', origin: null, use: 'отбеливание' },
   { name: 'DUCERAM', origin: 'Германия', use: 'коронки' },
   { name: 'VITA', origin: null, use: 'коронки' },
   { name: 'Noritake', origin: null, use: 'коронки' },

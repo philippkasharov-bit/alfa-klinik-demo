@@ -61,7 +61,12 @@
     started = true;
     syncMotion();
     reduced.addEventListener('change', syncMotion);
-    viewer.addEventListener('load', () => root.classList.add('is-3d'), { once: true });
+    viewer.addEventListener('load', () => {
+      root.classList.add('is-3d');
+      // After the cross-fade, drop the poster so it isn't a hidden raster in the layer tree
+      const poster = root.querySelector<HTMLImageElement>('.tooth__poster');
+      if (poster) setTimeout(() => { poster.hidden = true; }, 600);
+    }, { once: true });
     viewer.setAttribute('src', viewer.dataset.src!);
     const s = document.createElement('script');
     s.type = 'module';

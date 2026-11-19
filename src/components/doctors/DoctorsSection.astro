@@ -4,7 +4,8 @@
 // placeholder per verified department.
 import Section from '../layout/Section.astro';
 import DoctorCard from './DoctorCard.astro';
-import { doctors, doctorSlotOrder, doctorsSection, type DepartmentId, type Doctor } from '../../data/doctors';
+import { doctors, doctorSlotOrder, doctorsSection, departments, type DepartmentId, type Doctor } from '../../data/doctors';
+import { clinic } from '../../data/clinic';
 
 type Slot = { department: DepartmentId; doctor?: Doctor };
 
@@ -16,51 +17,63 @@ const slots: Slot[] =
     : doctorSlotOrder.map((department) => ({ department }));
 
 const [featured, ...others] = slots;
-const hasPlaceholders = slots.some((s) => !s.doctor);
+const hasDoctors = doctors.length > 0;
 ---
 <Section width="wide" tone="subtle" labelledby="doctors-title" id="doctors" class="doctors">
   <header class="doctors__head">
     <div class="doctors__head-main">
-      <p class="t-label" data-reveal="fade">{doctorsSection.eyebrow}</p>
       <h2 id="doctors-title" class="t-h2" data-reveal="slide">
-        {doctorsSection.heading.lead}{' '}<em>{doctorsSection.heading.accent}</em>
+        {hasDoctors ? <>{doctorsSection.heading.lead}{' '}<em>{doctorsSection.heading.accent}</em></> : doctorsSection.departmentsHeading}
       </h2>
     </div>
     <p class="t-body t-muted doctors__intro" data-reveal="fade" style="--reveal-delay: 1">{doctorsSection.intro}</p>
   </header>
 
-  {hasPlaceholders && (
-    <p class="doctors__notice" role="note">
-      <span class="doctors__notice-label">Скоро</span>
-      {doctorsSection.placeholderNotice}
-    </p>
-  )}
-
-  <div class="doctors__featured" data-reveal="slide">
-    <DoctorCard doctor={featured.doctor} department={featured.department} variant="featured" />
-  </div>
-
-  {others.length > 0 && (
-    <div class="doctors__rail" data-doctor-rail>
-      <div class="doctors__rail-head">
-        <h3 class="t-h3 doctors__rail-title">Другие специалисты</h3>
-        <div class="doctors__controls" data-rail-controls hidden>
-          <button type="button" class="doctors__ctrl" data-rail-prev aria-label="Предыдущие врачи">
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M15 8H2M7 3 2 8l5 5" stroke="currentColor" stroke-width="1.3"/></svg>
-          </button>
-          <button type="button" class="doctors__ctrl" data-rail-next aria-label="Следующие врачи">
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M1 8h13M9 3l5 5-5 5" stroke="currentColor" stroke-width="1.3"/></svg>
-          </button>
-        </div>
+  {hasDoctors ? (
+    <>
+      <div class="doctors__featured" data-reveal="slide">
+        <DoctorCard doctor={featured.doctor} department={featured.department} variant="featured" />
       </div>
 
-      <ul class="doctors__list" role="list" tabindex="0" aria-label="Другие специалисты, прокрутка по горизонтали" data-rail-track>
-        {others.map((s, i) => (
-          <li data-reveal="slide" style={`--reveal-delay: ${i}`}>
-            <DoctorCard doctor={s.doctor} department={s.department} variant="compact" headingLevel="h4" />
+      {others.length > 0 && (
+        <div class="doctors__rail" data-doctor-rail>
+          <div class="doctors__rail-head">
+            <h3 class="t-h3 doctors__rail-title">Другие специалисты</h3>
+            <div class="doctors__controls" data-rail-controls hidden>
+              <button type="button" class="doctors__ctrl" data-rail-prev aria-label="Предыдущие врачи">
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M15 8H2M7 3 2 8l5 5" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+              <button type="button" class="doctors__ctrl" data-rail-next aria-label="Следующие врачи">
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M1 8h13M9 3l5 5-5 5" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <ul class="doctors__list" role="list" tabindex="0" aria-label="Другие специалисты, прокрутка по горизонтали" data-rail-track>
+            {others.map((s, i) => (
+              <li data-reveal="slide" style={`--reveal-delay: ${i}`}>
+                <DoctorCard doctor={s.doctor} department={s.department} variant="compact" headingLevel="h4" />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
+  ) : (
+    <!-- No verified doctors yet: show the clinic's real departments instead of
+         fake name/photo slots. Cards return automatically once data/doctors.ts is filled. -->
+    <div class="depts">
+      <ul class="depts__list" role="list">
+        {doctorSlotOrder.map((id, i) => (
+          <li class="depts__item" data-reveal="slide" style={`--reveal-delay: ${Math.min(i, 3)}`}>
+            <span class="depts__name">{departments[id]}</span>
           </li>
         ))}
       </ul>
+      <div class="depts__note" data-reveal="fade">
+        <p>{doctorsSection.placeholderNotice}</p>
+        <a class="depts__phone t-num" href={clinic.phone.href}>{clinic.phone.display}</a>
+      </div>
     </div>
   )}
 </Section>
@@ -117,28 +130,57 @@ const hasPlaceholders = slots.some((s) => !s.doctor);
     .doctors__intro { padding-top: var(--space-6); }
   }
 
-  .doctors__notice {
+  /* ---------- Departments (shown until verified doctor profiles exist) ---------- */
+  .depts { display: grid; gap: var(--space-7); }
+  .depts__list {
     display: grid;
-    gap: var(--space-1);
-    max-width: 62ch;
-    margin-bottom: var(--space-8);
-    padding: var(--space-4) var(--space-5);
-    border: 1px dashed var(--color-border-strong);
-    border-radius: var(--radius-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-text);
+  }
+  .depts__item {
+    display: flex;
+    align-items: baseline;
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .depts__name {
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+    font-size: var(--size-title-sm);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  .depts__note {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+    max-width: 40ch;
     font-size: var(--size-small);
+    line-height: 1.6;
     color: var(--color-text-muted);
   }
-  .doctors__notice-label {
-    font-size: var(--size-label);
-    font-weight: var(--weight-semibold);
-    letter-spacing: 0.01em;
+  .depts__note p { margin: 0; }
+  .depts__phone {
+    justify-self: start;
+    font-family: var(--font-display);
+    font-size: var(--size-h3);
     color: var(--color-text);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-standard);
+  }
+  .depts__phone:hover { color: var(--color-text-accent); }
+  @media (min-width: 64rem) {
+    .depts { grid-template-columns: minmax(0, 8fr) minmax(0, 3fr); column-gap: var(--col-gap); }
+    .depts__list { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--grid-gap); }
+    .depts__item { padding-block: var(--space-5); min-height: 6.5rem; }
+    .depts__note { padding-top: var(--space-5); }
   }
 
   /* ---------- Rail ---------- */
   .doctors__rail { margin-top: var(--space-9); }
   @media (max-width: 39.99rem) {
-    .doctors__notice { margin-bottom: var(--space-6); padding: var(--space-3) var(--space-4); }
     .doctors__rail { margin-top: var(--space-7); }
   }
 

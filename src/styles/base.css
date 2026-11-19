@@ -31,6 +31,9 @@ p, h1, h2, h3, h4 { overflow-wrap: break-word; }
 h1, h2, h3, h4 { text-wrap: balance; }
 p { text-wrap: pretty; }
 ::selection { background: var(--color-accent-soft-hover); color: var(--color-text); }
+/* Browser surfaces carry the palette too */
+html { scrollbar-color: var(--color-border-strong) var(--color-bg); }
+input, textarea { caret-color: var(--color-accent); }
 
 /* ---------------------------------------------------------------------------
    Typography roles — use classes so semantics (h1..h6) stay independent of look
@@ -44,7 +47,9 @@ p { text-wrap: pretty; }
 .t-h1      { font-size: var(--size-h1);      line-height: var(--leading-tight); letter-spacing: var(--tracking-display); }
 .t-h2      { font-size: var(--size-h2);      line-height: var(--leading-snug);  letter-spacing: var(--tracking-heading); }
 /* Serif italic accent inside headings: <em> */
-.t-display em, .t-h1 em, .t-h2 em { font-style: italic; }
+/* Italic accent is reserved for the homepage hero; elsewhere a heading reads as one phrase */
+.t-display em { font-style: italic; }
+.t-h1 em, .t-h2 em { font-style: normal; }
 .t-display em { color: var(--color-text-accent); }
 
 .t-h3 {
@@ -68,26 +73,6 @@ p { text-wrap: pretty; }
   color: var(--color-text-muted);
 }
 
-/* Section kicker: the label that opens a section head gets a short rule —
-   the same device used in the featured offer and the closing CTA. */
-:is(.hero__main, .trust__head, .services__head, .about__content, .tech__head,
-    .journey__head-main, .doctors__head-main, .pricing__head-main, .faq__head,
-    .contact__head, .promos-intro__head, .price-intro__head, .price-notes__head,
-    .promo-conditions__head, .promos-block-head) > .t-label:first-child {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-  color: var(--color-text);
-}
-:is(.hero__main, .trust__head, .services__head, .about__content, .tech__head,
-    .journey__head-main, .doctors__head-main, .pricing__head-main, .faq__head,
-    .contact__head, .promos-intro__head, .price-intro__head, .price-notes__head,
-    .promo-conditions__head, .promos-block-head) > .t-label:first-child::before {
-  content: "";
-  width: 1.75rem;
-  height: 1px;
-  background: var(--color-accent);
-}
 .t-nav {
   font-size: var(--size-nav);
   font-weight: var(--weight-medium);

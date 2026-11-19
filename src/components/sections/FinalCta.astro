@@ -7,14 +7,12 @@ import Button from '../ui/Button.astro';
 
 interface Props {
   id?: string;
-  label?: string;
   heading?: { lead: string; accent: string };
   text?: string;
   ctaLabel?: string;
 }
 const {
   id = 'final',
-  label = 'Следующий шаг',
   heading = { lead: 'Начните', accent: 'с консультации' },
   text = 'Врач осмотрит, проведёт диагностику и составит план лечения со сроками и стоимостью. Расширенная консультация — бесплатно по акции клиники.',
   ctaLabel = 'Записаться на приём',
@@ -24,7 +22,6 @@ const {
   <span class="final__glow" aria-hidden="true"></span>
 
   <div class="container container--wide final__inner">
-    <p class="final__label" data-reveal="fade">{label}</p>
 
     <h2 id={`${id}-title`} class="final__title" data-reveal="slide">
       {heading.lead}{' '}<em>{heading.accent}</em>
@@ -85,19 +82,8 @@ const {
 
   .final__inner { display: grid; }
 
-  .final__label {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-3);
-    font-size: var(--size-label);
-    font-weight: var(--weight-semibold);
-    letter-spacing: 0.01em;
-    color: var(--muted);
-  }
-  .final__label::before { content: ""; width: 2rem; height: 1px; background: currentColor; }
-
   .final__title {
-    margin: var(--space-5) 0 0;
+    margin: 0;
     font-family: var(--font-display);
     font-weight: var(--weight-medium);
     font-size: clamp(3rem, 1.4rem + 7.2vw, 8.5rem);
@@ -105,7 +91,7 @@ const {
     letter-spacing: -0.03em;
     text-wrap: balance;
   }
-  .final__title em { display: block; font-style: italic; color: var(--color-bg-accent); }
+  .final__title em { display: block; font-style: normal; color: var(--color-bg-accent); }
 
   .final__row {
     display: grid;
