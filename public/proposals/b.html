@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B — Фарфор · Альфа-Клиник</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
+<style>
+:root{--white:#FFFFFF;--ink:#0E0F10;--porcelain:#ECEFF1;--mid:#6B7277;--cobalt:#2747D8;--g:clamp(16px,3vw,40px)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--white);color:var(--ink);font:400 16px/1.5 Onest,system-ui,sans-serif;overflow-x:hidden}
+.top{display:flex;justify-content:space-between;align-items:center;padding:20px var(--g);font-size:14px}
+.top b{font-weight:600;letter-spacing:-.02em;font-size:18px}.top nav{display:flex;gap:28px;color:var(--mid)}
+.pill{padding:12px 18px;border-radius:999px;background:var(--ink);color:#fff;text-decoration:none;font-weight:500}
+.hero{position:relative;padding:0 var(--g);min-height:calc(100svh - 72px);display:grid;align-content:space-between}
+h1{position:relative;z-index:1;margin-top:clamp(16px,4vh,48px);font:500 clamp(52px,11.2vw,184px)/.86 Onest,sans-serif;letter-spacing:-.06em}
+h1 .l2{display:block;padding-left:22vw}
+h1 .l3{display:block;color:var(--cobalt)}
+.tooth{position:absolute;z-index:2;left:50%;top:50%;width:min(38vw,520px);height:auto;translate:-30% -46%;filter:drop-shadow(0 40px 50px rgba(14,15,16,.16));animation:float 7s ease-in-out infinite}
+.halo{position:absolute;z-index:0;left:50%;top:50%;width:min(52vw,720px);aspect-ratio:1;translate:-38% -50%;border-radius:50%;background:radial-gradient(closest-side,var(--porcelain),transparent)}
+.foot{position:relative;z-index:3;display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:24px;align-items:end;padding:24px 0 28px;border-top:1px solid var(--porcelain)}
+.foot p{font-size:15px;color:var(--mid);max-width:36ch}.foot dt{font-size:12px;color:var(--mid)}.foot dd{margin:4px 0 0;font-weight:500}
+.go{justify-self:end;display:inline-flex;gap:10px;align-items:center;padding:20px 28px;border-radius:999px;background:var(--cobalt);color:#fff;text-decoration:none;font-weight:500}
+@keyframes float{50%{transform:translateY(-14px) rotate(2deg)}}
+@media (prefers-reduced-motion:reduce){.tooth{animation:none}}
+@media (max-width:760px){.top nav{display:none}h1 .l2{padding-left:0}.tooth{position:relative;left:auto;top:auto;translate:none;width:56vw;justify-self:center;margin:-8px 0}.halo{width:90vw;top:46%;translate:-50% -50%}
+.hero{min-height:calc(100svh - 72px)}.foot{grid-template-columns:1fr 1fr}.foot p{grid-column:1/-1}.go{grid-column:1/-1;justify-self:stretch;justify-content:center}}
+</style></head><body>
+<header class="top"><b>Альфа‑Клиник</b><nav><span>Услуги</span><span>Цены</span><span>Акции</span><span>Врачи</span><span>Контакты</span></nav><a class="pill" href="#">Записаться</a></header>
+<main class="hero">
+  <span class="halo"></span>
+  <h1>Внимательная<span class="l2">стоматология</span><span class="l3">и понятное лечение</span></h1>
+  <img class="tooth" src="/models/tooth-low.webp" alt="" width="720" height="720">
+  <div class="foot">
+    <p>Понятно объясняем план лечения, его стоимость, сроки и гарантии. Решение остаётся за вами.</p>
+    <dl><dt>Адрес</dt><dd>Воронцовские пруды, 3</dd></dl>
+    <dl><dt>Телефон</dt><dd>(499) 739-51-63</dd></dl>
+    <a class="go" href="#">Записаться на приём →</a>
+  </div>
+</main>
+</body></html>
