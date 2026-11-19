@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "public/proposals/a.html"
+        ],
+        "createdAt": "2026-11-19T12:21:37.570Z",
+        "reason": "agent decision: direction A is deliberately an atlas-paper palette; it is a proposal awaiting the owner's pick"
+      }
+    ]
+  }
+}
