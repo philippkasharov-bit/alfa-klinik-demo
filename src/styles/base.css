@@ -31,6 +31,14 @@ p, h1, h2, h3, h4 { overflow-wrap: break-word; }
 h1, h2, h3, h4 { text-wrap: balance; }
 p { text-wrap: pretty; }
 ::selection { background: var(--color-accent-soft-hover); color: var(--color-text); }
+/* v2: on navy bands the primary button is a white plate with navy text
+   (royal blue on navy is only 2.3:1 as a control boundary) */
+:is(.offer, .final, .pricing__cta, .callbar__inner, .section--inverse) {
+  --color-accent: #FFFFFF;
+  --color-accent-hover: #EAF1FB;
+  --color-accent-active: #D9E5F7;
+  --color-on-accent: var(--color-bg-inverse);
+}
 /* Browser surfaces carry the palette too */
 html { scrollbar-color: var(--color-border-strong) var(--color-bg); }
 input, textarea { caret-color: var(--color-accent); }

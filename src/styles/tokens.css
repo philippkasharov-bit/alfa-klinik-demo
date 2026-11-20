@@ -3,27 +3,28 @@
    Two layers:
      1. Primitives  (--palette-*, raw scales)   → never used directly in components
      2. Semantic    (--color-*, --text-*, ...)  → the only layer components consume
-   Direction A «Атлас»: paper, ink and one oxide accent, like a printed anatomical atlas.
-   Contrast ratios noted are against --color-bg (#F2EEE6) unless stated.
+   v2 — adapted from the GetLayers «Baseline» template (commercial licence): white and
+   off-white sheets, deep navy bands, royal-blue accent, rounded cards. Atlas figures stay.
+   Contrast ratios noted are against --color-bg (#FFFFFF) unless stated.
    ========================================================================= */
 
 :root {
   /* ---------------------------------------------------------------------
      1. COLOR — primitives
      --------------------------------------------------------------------- */
-  --palette-stone-50:  #F2EEE6;  /* paper                     */
-  --palette-stone-100: #E8E2D6;  /* paper, second sheet       */
-  --palette-stone-200: #CFC7B8;  /* hairline rules            */
-  --palette-stone-400: #7F776A;  /* control borders (≥3:1)    */
-  --palette-stone-600: #5E5A52;  /* muted text (5.9:1)        */
-  --palette-ink-900:   #1B1A17;  /* ink (15.0:1)              */
-  --palette-sage-50:   #ECE2D6;  /* oxide wash (light accent) */
-  --palette-sage-100:  #E3D3C2;  /* hover on oxide wash       */
-  --palette-sage-500:  #A8432C;  /* oxide accent (5.2:1; white on it 6.0:1) */
-  --palette-sage-600:  #8E3622;  /* oxide text / hover (6.7:1) */
-  --palette-sage-700:  #742B1B;  /* pressed                   */
+  --palette-stone-50:  #FFFFFF;  /* background                */
+  --palette-stone-100: #F4F4F4;  /* surface (off-white bands) */
+  --palette-stone-200: #E6E8EC;  /* hairline                  */
+  --palette-stone-400: #80868F;  /* control borders (3.3:1 on surface) */
+  --palette-stone-600: #5F6572;  /* muted (5.9:1; template's #717784 fails AA on white) */
+  --palette-ink-900:   #0A0A0A;  /* ink                       */
+  --palette-sage-50:   #EAF1FB;  /* blue wash (light accent)  */
+  --palette-sage-100:  #D9E5F7;  /* hover on blue wash        */
+  --palette-sage-500:  #2563C9;  /* brand blue (5.7:1; white on it 5.7:1) */
+  --palette-sage-600:  #1D4FA3;  /* brand text / hover (7.1:1 on surface) */
+  --palette-sage-700:  #173F82;  /* pressed                   */
   --palette-white:     #FFFFFF;
-  --palette-red-600:   #A3201B;  /* errors (6.5:1)            */
+  --palette-red-600:   #B42318;  /* errors (6.6:1)            */
 
   /* ---------------------------------------------------------------------
      1. COLOR — semantic
@@ -31,12 +32,12 @@
   --color-bg:               var(--palette-stone-50);
   --color-bg-subtle:        var(--palette-stone-100);
   --color-bg-accent:        var(--palette-sage-50);
-  --color-bg-inverse:       var(--palette-ink-900);
+  --color-bg-inverse:       #0F2F63;                   /* brand-deep navy: hero, stats, footer */
   --color-surface:          var(--palette-white);      /* inputs, raised cards */
 
   --color-text:             var(--palette-ink-900);
   --color-text-muted:       var(--palette-stone-600);
-  --color-text-inverse:     var(--palette-stone-50);
+  --color-text-inverse:     #FFFFFF;
   --color-text-accent:      var(--palette-sage-600);
 
   --color-accent:           var(--palette-sage-500);
@@ -48,7 +49,7 @@
 
   --color-border:           var(--palette-stone-200);  /* decorative dividers */
   --color-border-strong:    var(--palette-stone-400);  /* form controls (≥3:1) */
-  --color-border-inverse:   rgb(242 238 230 / 0.18);
+  --color-border-inverse:   rgb(255 255 255 / 0.15);
 
   --color-focus:            var(--palette-sage-600);
   --color-danger:           var(--palette-red-600);
@@ -59,14 +60,14 @@
      Serif display for editorial moments, grotesk for everything functional.
      Fluid sizes: clamp(min @ 360px, fluid, max @ 1440px).
      --------------------------------------------------------------------- */
-  --font-display: "Literata", Georgia, "Times New Roman", serif;
-  --font-sans:    "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Onest", system-ui, sans-serif;
+  --font-sans:    "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
   /* Mono only for figure numbers, captions and measurements — never for prose */
   --font-mono:    "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
 
   --weight-regular: 400;
   --weight-medium:  500;
-  --weight-semibold:600;
+  --weight-semibold:500; /* Onest ships 400/500 only here */
 
   /* size scale */
   --size-display: clamp(3rem,    2.1rem + 4vw,    5.75rem);  /* 48 → 92 */
@@ -129,10 +130,10 @@
      4. RADIUS — near-square; architecture, not bubbles
      --------------------------------------------------------------------- */
   --radius-none: 0;
-  --radius-xs:   0;      /* atlas: square corners throughout */
-  --radius-sm:   0;
-  --radius-md:   2px;
-  --radius-pill: 0;      /* buttons are square plates too */
+  --radius-xs:   0.75rem; /* inputs, chips */
+  --radius-sm:   1.5rem;  /* cards, figures */
+  --radius-md:   2rem;    /* bands */
+  --radius-pill: 62.5rem; /* buttons */
 
   /* ---------------------------------------------------------------------
      5. SHADOWS — used sparingly; borders do most of the work
