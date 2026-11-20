@@ -188,4 +188,31 @@
     .tooth__notes span { font-family: var(--font-mono); color: var(--color-text-accent); margin-right: 0.4em; }
     .tooth__notes small { display: block; font: var(--weight-regular) 0.75rem/1.4 var(--font-mono); color: var(--color-text-muted); }
   }
+
+  /* v2: the plate is a light card inside the navy hero, so it resets to light tokens */
+  .tooth {
+    --color-text: var(--palette-ink-900);
+    --color-text-muted: var(--palette-stone-600);
+    --color-text-accent: var(--palette-sage-600);
+    --color-accent: var(--palette-sage-500);
+    --color-border: var(--palette-stone-200);
+    --color-bg: var(--palette-stone-50);
+    color: var(--color-text);
+    border-radius: inherit;
+    overflow: hidden;
+  }
+  /* Callouts get their own column: they can no longer sit on the tooth («02 Гигиена» overlap) */
+  @media (min-width: 64rem) {
+    .tooth { grid-template-columns: minmax(12rem, 0.55fr) minmax(0, 1fr); place-items: center; padding-bottom: 3rem; }
+    .tooth__poster, .tooth__viewer { grid-area: 1 / 2; }
+    .tooth__notes {
+      position: static;
+      grid-area: 1 / 1;
+      display: grid;
+      gap: var(--space-6);
+      justify-self: start;
+      padding-left: var(--space-5);
+    }
+    .tooth__notes li { position: relative; left: auto; top: auto; }
+  }
 </style>
